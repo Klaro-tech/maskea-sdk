@@ -6,21 +6,21 @@ this session: don't claim something's launch-ready until it's verified.
 
 ## Ready
 
-- [x] `@klaroshield/sdk@0.6.1` published to npm, real homepage/bugs/topics set
+- [x] `@maskea/sdk@0.6.1` published to npm, real homepage/bugs/topics set
 - [x] GitHub repo public, description real, 10 topics set
-- [x] README covers all 6 middlewares + 11 CLI commands + Klaro Cloud
-- [x] Full docs site (`/klaroshield/docs`) — index, CLI reference, middleware
+- [x] README covers all 6 middlewares + 11 CLI commands + Maskea Cloud
+- [x] Full docs site (`/maskea/docs`) — index, CLI reference, middleware
       reference, dashboard docs
-- [x] 28 real recipes as individual SEO pages (`/klaroshield/recipes/*`)
-- [x] Live playground, no signup required (`/klaroshield/playground`)
-- [x] Klaro Cloud fully live — sync, CLI, dashboard, real billing tiers
+- [x] 28 real recipes as individual SEO pages (`/maskea/recipes/*`)
+- [x] Live playground, no signup required (`/maskea/playground`)
+- [x] Maskea Cloud fully live — sync, CLI, dashboard, real billing tiers
 - [x] Product Hunt listing copy drafted (`product-hunt-listing.md`)
 - [x] Show HN post drafted (`show-hn-post.md`)
 
 ## Needs Vikram's action before submitting anywhere
 
-- [ ] **5 real screenshots/recordings** — `klaro doctor`, `klaro
-      dashboard`, `klaro benchmark`, the recipes grid, Klaro Cloud
+- [ ] **5 real screenshots/recordings** — `maskea doctor`, `maskea
+      dashboard`, `maskea benchmark`, the recipes grid, Maskea Cloud
       dashboard with a real project. Must be actual captures, not
       mockups — matches the site's own "every terminal capture on this
       page comes from an actual execution" standard.
@@ -28,7 +28,7 @@ this session: don't claim something's launch-ready until it's verified.
       12:01am PT. HN "Show HN" has no strict timing rule but weekday
       mornings US time get more traffic.
 - [ ] **GA traffic check before committing a launch slot** — per this
-      session's own finding, klaroshield had ~zero organic traffic in
+      session's own finding, maskea had ~zero organic traffic in
       GA over the last 4 weeks (July 15 – Aug 11). That's expected before
       a launch (launches are the traffic driver), not a blocker, but
       worth knowing going in: this will likely be the first real signal

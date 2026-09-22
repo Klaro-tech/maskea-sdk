@@ -1,4 +1,4 @@
-import type { Klaro } from "./klaro.js"
+import type { Maskea } from "./maskea.js"
 
 export type SimulationScenario = "rate_limit" | "server_error" | "timeout" | "bad_json" | "prompt_injection" | "huge_prompt"
 
@@ -59,12 +59,12 @@ const SCENARIOS: Record<SimulationScenario, { description: string; args: unknown
 
 /**
  * Runs a synthetic call representing each scenario through the
- * developer's OWN configured Klaro instance, so they see what their real
+ * developer's OWN configured Maskea instance, so they see what their real
  * pipeline actually does (does the rate-limit case retry and recover? does
  * the huge-prompt case get flagged by budget()? does the injection attempt
  * get redacted?) before it happens for real in production.
  */
-export async function simulate(klaro: Klaro, scenario: SimulationScenario): Promise<SimulationResult> {
+export async function simulate(maskea: Maskea, scenario: SimulationScenario): Promise<SimulationResult> {
   const def = SCENARIOS[scenario]
   const start = Date.now()
   let attempt = 0
@@ -77,7 +77,7 @@ export async function simulate(klaro: Klaro, scenario: SimulationScenario): Prom
     return { echoed: arg }
   }
 
-  const wrapped = klaro.wrap(fn)
+  const wrapped = maskea.wrap(fn)
 
   try {
     const result = await wrapped(def.args[0])

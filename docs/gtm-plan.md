@@ -1,4 +1,4 @@
-# KlaroShield GTM System (Session 3)
+# maskea GTM System (Session 3)
 
 Asset-driven, not paid-ads-driven — consistent with the earlier brief's
 "forget paid ads, build around assets" direction. Every week ships one
@@ -15,7 +15,7 @@ they're ready burns the one shot at each channel's algorithm/audience:
 - [ ] `README.md` rewritten to lead with the install command and the
       real code example, not a feature list (see §5 below)
 - [ ] At least 4 real recipes published (Session 1 §7's teaser set)
-- [ ] `klaro doctor`/`stats`/`explain`/`simulate`/`benchmark` all have a
+- [ ] `maskea doctor`/`stats`/`explain`/`simulate`/`benchmark` all have a
       GIF or short screen recording — text-only CLI output doesn't
       survive a Twitter/Reddit feed the way a 10-second clip does
 - [ ] npm package has a README that renders correctly on npmjs.com
@@ -35,13 +35,13 @@ they're ready burns the one shot at each channel's algorithm/audience:
 **Weeks 3-4 — Soft channels**
 - Week 3: Dev.to post — "Why every AI app ends up writing the same
   500 lines of retry/redaction code" (the problem-framing post, not a
-  product pitch — links to KlaroShield once, in the last paragraph).
+  product pitch — links to maskea once, in the last paragraph).
 - Week 4: Reddit (r/LocalLLaMA for the Ollama angle specifically,
-  r/node or r/typescript for the SDK angle) — post the `klaro doctor`
+  r/node or r/typescript for the SDK angle) — post the `maskea doctor`
   GIF with minimal text, let the tool speak.
 
 **Week 5 — Hacker News**
-- "Show HN: KlaroShield — retries, budgets, and PII redaction for any
+- "Show HN: maskea — retries, budgets, and PII redaction for any
   AI SDK call". Post Tuesday-Thursday, 8-10am ET (HN's highest-traffic
   window). Title must pass the litmus test already established: would
   a stranger stop scrolling for this. "Show HN" + a working `npm
@@ -74,7 +74,7 @@ they're ready burns the one shot at each channel's algorithm/audience:
 - Respond to every GitHub issue within 48h — in the first 90 days,
   responsiveness matters more than roadmap velocity for converting
   early adopters into repeat users.
-- Weekly `klaro stats`-style build-in-public tweet if there's real
+- Weekly `maskea stats`-style build-in-public tweet if there's real
   install/usage data worth sharing (actual numbers only — a fabricated
   "10k downloads!" claim that npm's own public stats contradict is a
   credibility risk, not a growth hack).
@@ -88,7 +88,7 @@ audience needs convincing first. Structure:
 1. One-sentence positioning + badge row (npm version, license, build
    status once CI exists).
 2. The 30-second install+code example (Session 1 §3, verbatim).
-3. A GIF of `klaro doctor` immediately after — this is the single
+3. A GIF of `maskea doctor` immediately after — this is the single
    highest-leverage piece of the README, shows real value before
    asking for a `git clone`.
 4. "Why" — 3 sentences max on the actual problem (every AI app
@@ -104,7 +104,7 @@ audience needs convincing first. Structure:
   generic homepage can never rank for.
 - ~15 doc pages (one per middleware + CLI command + getting-started +
   FAQ) — necessary regardless of SEO, doubles as content.
-- ~10 comparison pages, written honestly (KlaroShield vs. LiteLLM vs.
+- ~10 comparison pages, written honestly (maskea vs. LiteLLM vs.
   Portkey vs. Helicone) — these convert well IF genuinely fair; a
   transparently biased comparison page is worse than not having one,
   since technical readers check.

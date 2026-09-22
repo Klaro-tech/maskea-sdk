@@ -8,7 +8,7 @@ export function renderPage(): string {
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>KlaroShield Dashboard</title>
+<title>maskea Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
   :root { color-scheme: dark; }
@@ -52,13 +52,13 @@ export function renderPage(): string {
 </style>
 </head>
 <body>
-  <h1>KlaroShield Dashboard</h1>
-  <p class="subtitle">Local only — reads <code>.klaro/</code> directly, nothing leaves this machine.</p>
+  <h1>maskea Dashboard</h1>
+  <p class="subtitle">Local only — reads <code>.maskea/</code> directly, nothing leaves this machine.</p>
 
   <div class="cloud-cta">
     <div class="text">
       <strong>See this across every project?</strong>
-      Klaro Cloud syncs this data across your team. Not live yet.
+      Maskea Cloud syncs this data across your team. Not live yet.
     </div>
     <button disabled>Coming soon</button>
   </div>
@@ -87,7 +87,7 @@ async function render() {
 
   const cards = document.getElementById('cards');
   if (data.totals.calls === 0) {
-    cards.innerHTML = '<div class="empty" style="grid-column: 1/-1;">No calls recorded yet. Wrap a call with klaro.wrap(...) and refresh.</div>';
+    cards.innerHTML = '<div class="empty" style="grid-column: 1/-1;">No calls recorded yet. Wrap a call with maskea.wrap(...) and refresh.</div>';
   } else {
     cards.innerHTML = [
       ['Health Score', data.healthScore + '/100', scoreClass(data.healthScore)],

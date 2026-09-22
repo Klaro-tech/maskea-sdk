@@ -53,7 +53,7 @@ export function validation<T = unknown>(options: ValidationOptions<T>): Middlewa
         // provider instead of getting an unvalidated response with no
         // signal anything went wrong.
         throw new Error(
-          "[klaroshield] validation(): could not locate output text in the response. " +
+          "[maskea] validation(): could not locate output text in the response. " +
             "Pass extractText(result) to tell it where your provider puts the response text."
         )
       }
@@ -64,7 +64,7 @@ export function validation<T = unknown>(options: ValidationOptions<T>): Middlewa
       } catch (e) {
         lastError = e
         if (attempt <= maxRetries) continue
-        throw new Error(`[klaroshield] validation(): output was not valid JSON after ${attempt} attempt(s): ${text.slice(0, 200)}`)
+        throw new Error(`[maskea] validation(): output was not valid JSON after ${attempt} attempt(s): ${text.slice(0, 200)}`)
       }
 
       const validated = options.schema.safeParse(parsed)
@@ -74,7 +74,7 @@ export function validation<T = unknown>(options: ValidationOptions<T>): Middlewa
       }
       lastError = validated.error
       if (attempt > maxRetries) {
-        throw new Error(`[klaroshield] validation(): schema validation failed after ${attempt} attempt(s): ${JSON.stringify(validated.error)}`)
+        throw new Error(`[maskea] validation(): schema validation failed after ${attempt} attempt(s): ${JSON.stringify(validated.error)}`)
       }
     }
 

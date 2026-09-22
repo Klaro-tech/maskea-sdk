@@ -1,5 +1,5 @@
 // Core middleware contract. Modeled on Express/Koa's (req, next) shape, but
-// generic over the call signature instead of HTTP -- klaro.wrap() accepts
+// generic over the call signature instead of HTTP -- maskea.wrap() accepts
 // ANY async function (an OpenAI call, an Anthropic call, a Vercel AI SDK
 // generateText call), so middleware can't assume a specific provider's
 // argument/response shape. This is the answer to "wraps rather than

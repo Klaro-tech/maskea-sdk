@@ -17,11 +17,11 @@ function openBrowser(url: string): void {
 }
 
 /**
- * `klaro dashboard` -- local only, no Klaro account, no data leaving this
+ * `maskea dashboard` -- local only, no Maskea account, no data leaving this
  * machine. Deliberately does NOT show a "raw vs redacted" diff for
  * secrets/PII: the whole point of secrets()/pii() middleware is that the
  * raw sensitive value is never persisted anywhere, including
- * .klaro/logs.jsonl -- building a diff view would require storing the
+ * .maskea/logs.jsonl -- building a diff view would require storing the
  * exact thing the SDK exists to avoid storing. Shows which redaction
  * rule fired and how many matches instead, which is the honest version
  * of that feature given the data that actually (and correctly) exists.
@@ -30,8 +30,8 @@ export function dashboard(port: number): void {
   sendTelemetry("dashboard_opened", { cliCommand: "dashboard" })
   const server = startDashboardServer(port)
   const url = `http://localhost:${port}`
-  console.log(`${pc.bold("klaroshield dashboard")} running at ${pc.cyan(url)}`)
-  console.log(pc.dim("Local only — reads .klaro/ directly, nothing leaves this machine. Ctrl+C to stop."))
+  console.log(`${pc.bold("maskea dashboard")} running at ${pc.cyan(url)}`)
+  console.log(pc.dim("Local only — reads .maskea/ directly, nothing leaves this machine. Ctrl+C to stop."))
   openBrowser(url)
 
   process.on("SIGINT", () => {

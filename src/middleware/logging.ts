@@ -50,7 +50,7 @@ export function logging(options: LoggingOptions = {}): Middleware {
 }
 
 function writeLog(record: LogRecord, format: "pretty" | "json" | "silent"): void {
-  // Persisted regardless of display format -- `klaro inspect`/`klaro stats`
+  // Persisted regardless of display format -- `maskea inspect`/`maskea stats`
   // read this file, so logging({format: 'silent'}) means "don't print to
   // stdout," not "don't record anything."
   appendJsonLine("logs", record)
@@ -67,5 +67,5 @@ function writeLog(record: LogRecord, format: "pretty" | "json" | "silent"): void
   if (record.piiHits) flags.push(pc.yellow("PII redacted"))
   const flagStr = flags.length ? ` [${flags.join(", ")}]` : ""
   const attemptStr = record.attempt > 1 ? ` (attempt ${record.attempt})` : ""
-  console.log(`${pc.dim("[klaroshield]")} ${status} ${record.durationMs}ms${attemptStr}${flagStr}${record.error ? ` ${pc.red(`— ${record.error}`)}` : ""}`)
+  console.log(`${pc.dim("[maskea]")} ${status} ${record.durationMs}ms${attemptStr}${flagStr}${record.error ? ` ${pc.red(`— ${record.error}`)}` : ""}`)
 }

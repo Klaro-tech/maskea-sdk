@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest"
 import { rmSync, existsSync } from "node:fs"
-import { Klaro } from "../../klaro.js"
+import { Maskea } from "../../maskea.js"
 import { retries } from "../../middleware/retries.js"
 import { logging } from "../../middleware/logging.js"
 import { explain } from "./explain.js"
 
-const KLARO_DIR = new URL("../../../.klaro", import.meta.url).pathname
+const KLARO_DIR = new URL("../../../.maskea", import.meta.url).pathname
 
 beforeEach(() => {
   if (existsSync(KLARO_DIR)) rmSync(KLARO_DIR, { recursive: true, force: true })
@@ -21,9 +21,9 @@ describe("explain", () => {
     // log records. This is the exact bug found while building the
     // feature: an earlier version used .find() and returned the first
     // (failed) attempt instead of the real outcome.
-    const klaro = new Klaro().use(retries({ max: 3, baseDelayMs: 1 })).use(logging({ format: "silent" }))
+    const maskea = new Maskea().use(retries({ max: 3, baseDelayMs: 1 })).use(logging({ format: "silent" }))
     let attempts = 0
-    const wrapped = klaro.wrap(async () => {
+    const wrapped = maskea.wrap(async () => {
       attempts++
       if (attempts < 2) {
         const err: any = new Error("rate limited")

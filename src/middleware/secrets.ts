@@ -31,7 +31,7 @@ export function secrets(options: SecretsOptions = {}): Middleware {
       ctx.meta.secretHits = hits
       if (mode === "block") {
         throw new Error(
-          `[klaroshield] Blocked call: secret(s) detected in the request (${hits.map((h) => `${h.rule}×${h.count}`).join(", ")}). ` +
+          `[maskea] Blocked call: secret(s) detected in the request (${hits.map((h) => `${h.rule}×${h.count}`).join(", ")}). ` +
             `Set secrets({ mode: "mask" }) to redact instead of blocking.`
         )
       }
@@ -48,7 +48,7 @@ export function secrets(options: SecretsOptions = {}): Middleware {
       ctx.meta.secretHitsResponse = responseHits
       if (mode === "block") {
         throw new Error(
-          `[klaroshield] Blocked call: secret(s) detected in the provider's response (${responseHits.map((h) => `${h.rule}×${h.count}`).join(", ")}). ` +
+          `[maskea] Blocked call: secret(s) detected in the provider's response (${responseHits.map((h) => `${h.rule}×${h.count}`).join(", ")}). ` +
             `Set secrets({ mode: "mask" }) to redact instead of blocking.`
         )
       }

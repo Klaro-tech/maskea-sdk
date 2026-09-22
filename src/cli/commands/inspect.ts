@@ -15,12 +15,12 @@ interface LogRecord {
 export function inspect(limit: number): void {
   const logs = readJsonLines<LogRecord>("logs")
   if (logs.length === 0) {
-    console.log("No calls recorded yet in .klaro/logs.jsonl.")
+    console.log("No calls recorded yet in .maskea/logs.jsonl.")
     return
   }
 
   const recent = logs.slice(-limit).reverse()
-  console.log(`${pc.bold("klaroshield inspect")} — last ${recent.length} of ${logs.length} call(s)\n`)
+  console.log(`${pc.bold("maskea inspect")} — last ${recent.length} of ${logs.length} call(s)\n`)
 
   for (const r of recent) {
     const status = r.ok ? pc.green("✓") : pc.red("✗")

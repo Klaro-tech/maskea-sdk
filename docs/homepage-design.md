@@ -1,8 +1,8 @@
-# KlaroShield Homepage Design — Session 1
+# maskea Homepage Design — Session 1
 
 Blueprint for the marketing site and documentation. Every code example and
 CLI output shown here is real — copied from actual verified runs against
-`@klaroshield/sdk@0.2.0`, not invented for marketing. Where a section
+`@maskea/sdk@0.2.0`, not invented for marketing. Where a section
 references something not yet built (the local dashboard, the playground),
 it's marked **[NOT YET LIVE]** so whoever builds the site knows what to
 gate behind a "coming soon" state rather than ship a broken demo.
@@ -38,7 +38,7 @@ Why this one over the alternatives already on the table:
    for every AI call. Installed in one line. Zero required account.
 
    ┌─────────────────────────────────────┐
-   │ $ npm install @klaroshield/sdk       │  [copy icon]
+   │ $ npm install @maskea/sdk       │  [copy icon]
    └─────────────────────────────────────┘
 
    [ View on GitHub ]   [ Read the docs ]
@@ -55,24 +55,24 @@ Real, copy-pasted from `README.md`, not simplified into something that
 doesn't actually run:
 
 ```ts
-import { Klaro, retries, budget, secrets, pii, logging } from "@klaroshield/sdk";
+import { Maskea, retries, budget, secrets, pii, logging } from "@maskea/sdk";
 import OpenAI from "openai";
 
 const openai = new OpenAI();
 
-const klaro = new Klaro()
+const maskea = new Maskea()
   .use(retries({ max: 3, backoff: "exponential" }))
   .use(budget({ maxMonthlyUsd: 50 }))
   .use(secrets({ mode: "mask" }))
   .use(pii({ mode: "mask" }))
   .use(logging({ format: "pretty" }));
 
-const chat = klaro.wrap(openai.chat.completions.create.bind(openai.chat.completions));
+const chat = maskea.wrap(openai.chat.completions.create.bind(openai.chat.completions));
 ```
 
 One caption line under it, small and honest:
 *"Wraps your existing OpenAI/Anthropic call. Doesn't replace your SDK,
-doesn't require a Klaro account."*
+doesn't require a Maskea account."*
 
 ## 4. "Why developers install it" — 6 cards
 
@@ -83,16 +83,16 @@ Each card names a REAL, shipped capability. No aspirational cards.
 | 🔁 | Smart retries | Exponential backoff with jitter — only retries what's actually transient (429/5xx), never burns your rate limit on a 401. |
 | 🔒 | Secrets & PII, gone | Deep-scans every call for API keys, JWTs, emails, SSNs, cards — masked before they ever leave your process. |
 | 💰 | Know your spend | Real cost estimated from your provider's own usage response, tracked locally, capped if you want. |
-| 🩺 | `klaro doctor` | Checks provider connectivity for real, flags an unhealthy retry rate, recommends a cheaper model — backed by your own recorded usage, not a guess. |
-| 🧪 | `klaro simulate` | Run rate limits, timeouts, bad JSON, and prompt injection through YOUR pipeline before they happen in production. |
-| 📦 | Zero lock-in | MIT licensed. Runs entirely local. `.klaro/` is a folder of JSON files you already own. |
+| 🩺 | `maskea doctor` | Checks provider connectivity for real, flags an unhealthy retry rate, recommends a cheaper model — backed by your own recorded usage, not a guess. |
+| 🧪 | `maskea simulate` | Run rate limits, timeouts, bad JSON, and prompt injection through YOUR pipeline before they happen in production. |
+| 📦 | Zero lock-in | MIT licensed. Runs entirely local. `.maskea/` is a folder of JSON files you already own. |
 
 ## 5. CLI section — animated terminal
 
 Show the REAL output (captured from an actual run), not a redesigned
 mockup. Cycle through 3 commands on a loop, ~4s each:
 
-**`klaro doctor`** (real output shape, live-verified this session):
+**`maskea doctor`** (real output shape, live-verified this session):
 ```
 ────────────────────────────
 AI Runtime Health
@@ -103,7 +103,7 @@ AI Runtime Health
 ✓ Claude Connected         authenticated
 ⚠ Gemini Connected         GEMINI_API_KEY not set
 ✓ Retry Policy             4% of calls needed a retry — healthy
-✓ .klaro/ local storage    exists
+✓ .maskea/ local storage    exists
 
 ⚠ gpt-4-turbo costs 98% more than gpt-4o-mini for comparable output
   Potential savings: $0.98 based on your recorded usage
@@ -111,10 +111,10 @@ AI Runtime Health
 Health Score: 92/100
 ```
 
-**`klaro stats`** ("Today's AI Health" card — exact real format already
+**`maskea stats`** ("Today's AI Health" card — exact real format already
 shipped).
 
-**`klaro benchmark`** (real markdown table output).
+**`maskea benchmark`** (real markdown table output).
 
 ## 6. Interactive Playground **[NOT YET LIVE — build order below]**
 
@@ -167,7 +167,7 @@ Annual billing note directly under the table, not buried in fine print:
 months of service."*
 
 **Honesty constraint for whoever builds this section:** every "Cloud
-sync"/"Remote configuration"/"Team policies" line item describes Klaro
+sync"/"Remote configuration"/"Team policies" line item describes Maskea
 Cloud, which does not exist yet (Session 2, not started). Do not enable
 checkout on Developer/Team/Startup until Cloud is real — a customer
 paying $30/mo for "cloud sync" that doesn't exist is a support and trust
@@ -188,7 +188,7 @@ like switching products" principle).
   blob backgrounds.
 - Every screenshot on the page must be a REAL terminal/CLI capture, not
   a redesigned graphic — the moment a visitor senses the CLI output on
-  the homepage doesn't match what `npx klaro doctor` actually prints,
+  the homepage doesn't match what `npx maskea doctor` actually prints,
   the whole page's credibility drops.
 - No version numbers anywhere on the page (already-established rule).
 

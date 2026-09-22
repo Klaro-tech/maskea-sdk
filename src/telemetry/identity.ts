@@ -30,7 +30,7 @@ function newId(prefix: "ks" | "kp"): string {
   return `${prefix}_${randomUUID()}`
 }
 
-/** Created once on first run and never regenerated unless the developer deletes .klaro/install.json themselves. `created` tells the caller whether this call is the one that just made it, so sdk_installed can fire exactly once. */
+/** Created once on first run and never regenerated unless the developer deletes .maskea/install.json themselves. `created` tells the caller whether this call is the one that just made it, so sdk_installed can fire exactly once. */
 export function getOrCreateInstall(): { install: InstallIdentity; created: boolean } {
   const existing = readJson<InstallIdentity | null>("install", null)
   if (existing) return { install: existing, created: false }
@@ -39,7 +39,7 @@ export function getOrCreateInstall(): { install: InstallIdentity; created: boole
   return { install, created: true }
 }
 
-/** One project identity per .klaro/ directory (i.e. per project, since storage is cwd-relative). Created by `klaro init`, or lazily on first telemetry-emitting call if init was never run. */
+/** One project identity per .maskea/ directory (i.e. per project, since storage is cwd-relative). Created by `maskea init`, or lazily on first telemetry-emitting call if init was never run. */
 export function getOrCreateProject(projectName?: string): { project: ProjectIdentity; created: boolean } {
   const existing = readJson<ProjectIdentity | null>("project", null)
   if (existing) return { project: existing, created: false }
@@ -58,7 +58,7 @@ export function writeTelemetryConfig(config: TelemetryConfig): void {
   writeJson("config", config)
 }
 
-/** KLARO_TELEMETRY=0 always wins over .klaro/config.json, per the brief's "environment variable should override configuration." */
+/** KLARO_TELEMETRY=0 always wins over .maskea/config.json, per the brief's "environment variable should override configuration." */
 export function isTelemetryEnabled(): boolean {
   if (process.env.KLARO_TELEMETRY === "0") return false
   if (process.env.KLARO_TELEMETRY === "1") return true

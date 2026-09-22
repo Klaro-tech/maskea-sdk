@@ -4,7 +4,7 @@ import { join } from "node:path"
 import { getOrCreateInstall, getOrCreateProject, isTelemetryEnabled, readTelemetryConfig, writeTelemetryConfig } from "./identity.js"
 import { sendTelemetry } from "./send.js"
 
-const KLARO_DIR = join(process.cwd(), ".klaro")
+const KLARO_DIR = join(process.cwd(), ".maskea")
 
 beforeEach(() => {
   rmSync(KLARO_DIR, { recursive: true, force: true })

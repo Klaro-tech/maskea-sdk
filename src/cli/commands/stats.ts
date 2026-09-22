@@ -51,7 +51,7 @@ export function stats(): void {
   const budgetConfig = readJson<BudgetConfig | null>("budget-config", null)
 
   if (logs.length === 0) {
-    console.log("No calls recorded yet in .klaro/logs.jsonl. Wrap a call with klaro.wrap(...) and it'll show up here.")
+    console.log("No calls recorded yet in .maskea/logs.jsonl. Wrap a call with maskea.wrap(...) and it'll show up here.")
     return
   }
 

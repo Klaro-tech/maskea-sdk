@@ -1,12 +1,12 @@
 import { describe, it, expect } from "vitest"
-import { Klaro } from "../klaro.js"
+import { Maskea } from "../maskea.js"
 import { vulnSignatures } from "./vuln-signatures.js"
 import { deepRedact, type RedactionRule } from "./redact-utils.js"
 
 describe("vulnSignatures middleware", () => {
   it("flags a known-vulnerable log4j-core version in the outbound request WITHOUT altering the text", async () => {
-    const klaro = new Klaro().use(vulnSignatures())
-    const wrapped = klaro.wrap(async (arg: { text: string }) => {
+    const maskea = new Maskea().use(vulnSignatures())
+    const wrapped = maskea.wrap(async (arg: { text: string }) => {
       // the whole point of "flag" -- the vulnerable string must still be
       // present for the wrapped call to see, not redacted away.
       expect(arg.text).toContain("log4j-core:2.14.1")
@@ -17,15 +17,15 @@ describe("vulnSignatures middleware", () => {
   })
 
   it("flags a vulnerable signature in the provider's response too", async () => {
-    const klaro = new Klaro().use(vulnSignatures())
-    const wrapped = klaro.wrap(async () => ({ text: "this project depends on spring-core:5.3.17" }))
+    const maskea = new Maskea().use(vulnSignatures())
+    const wrapped = maskea.wrap(async () => ({ text: "this project depends on spring-core:5.3.17" }))
     const result = await wrapped()
     expect(result.text).toContain("spring-core:5.3.17")
   })
 
   it("does not flag a patched version outside the vulnerable range", async () => {
-    const klaro = new Klaro().use(vulnSignatures())
-    const wrapped = klaro.wrap(async (arg: { text: string }) => ({ echo: arg.text }))
+    const maskea = new Maskea().use(vulnSignatures())
+    const wrapped = maskea.wrap(async (arg: { text: string }) => ({ echo: arg.text }))
     const result = await wrapped({ text: "we use log4j-core:2.17.1 (patched)" })
     expect(result.echo).toContain("log4j-core:2.17.1")
   })

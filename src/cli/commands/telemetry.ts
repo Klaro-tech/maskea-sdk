@@ -21,7 +21,7 @@ export function telemetryStatus(): void {
     const { installationId } = getOrCreateInstall().install
     console.log(pc.dim(`\nInstallation ID: ${installationId}`))
   }
-  console.log(pc.dim("\nDisable: npx klaro telemetry disable    Enable: npx klaro telemetry enable"))
+  console.log(pc.dim("\nDisable: npx maskea telemetry disable    Enable: npx maskea telemetry enable"))
 }
 
 export function telemetryEnable(): void {

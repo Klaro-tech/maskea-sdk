@@ -43,7 +43,7 @@ function sumHits(records: { count: number }[] | undefined): number {
 }
 
 /**
- * Same computation logic as `klaro stats`, factored out so the dashboard
+ * Same computation logic as `maskea stats`, factored out so the dashboard
  * and the CLI command stay consistent instead of two independently
  * maintained copies of "what counts as retries saved" drifting apart.
  */

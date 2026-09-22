@@ -33,7 +33,7 @@ interface BudgetRecord {
 // reported as "not configured," not as a failed connection attempt.
 //
 // `skip: true` on the unset-key case is load-bearing (see
-// computeHealthScore): klaro is fully provider-agnostic (.wrap() takes
+// computeHealthScore): maskea is fully provider-agnostic (.wrap() takes
 // any async function, works with any provider), but this list can only
 // ever name a finite set of providers to actively probe. Confirmed live,
 // 2026-08-17: a developer using only Groq or Cerebras -- both real,
@@ -61,14 +61,14 @@ function checkNodeVersion(): Check {
   return {
     name: "Node.js version",
     ok: major >= 18,
-    detail: `v${process.versions.node}${major >= 18 ? "" : " — klaroshield requires Node 18+"}`,
+    detail: `v${process.versions.node}${major >= 18 ? "" : " — maskea requires Node 18+"}`,
   }
 }
 
 function checkKlaroDir(): Check {
-  const dir = join(process.cwd(), ".klaro")
+  const dir = join(process.cwd(), ".maskea")
   return {
-    name: ".klaro/ local storage",
+    name: ".maskea/ local storage",
     ok: existsSync(dir),
     warn: !existsSync(dir),
     detail: existsSync(dir) ? "exists" : "not yet created — will be created on first wrapped call",
@@ -153,7 +153,7 @@ function findCostRecommendation(): CostRecommendation | null {
 function computeHealthScore(checks: Check[]): number {
   // Weighted, not a plain pass/warn/fail average -- a missing provider key
   // (warn) shouldn't cost as much as a genuinely failed connection (fail),
-  // and Node version / .klaro dir are minor relative to whether calls
+  // and Node version / .maskea dir are minor relative to whether calls
   // actually work. `skip` checks (a provider this developer simply
   // doesn't use) are excluded entirely -- see checkProviderConnection.
   let score = 100
@@ -182,7 +182,7 @@ export async function doctor(): Promise<void> {
     checkProviderConnection("OpenAI", "OPENAI_API_KEY", "https://api.openai.com/v1/models", (k) => ({ Authorization: `Bearer ${k}` })),
     checkProviderConnection("Claude", "ANTHROPIC_API_KEY", "https://api.anthropic.com/v1/models", (k) => ({ "x-api-key": k, "anthropic-version": "2023-06-01" })),
     checkProviderConnection("Gemini", "GEMINI_API_KEY", "https://generativelanguage.googleapis.com/v1beta/models", (k) => ({ "x-goog-api-key": k })),
-    // Groq and Cerebras -- real, fully-supported providers (klaro's
+    // Groq and Cerebras -- real, fully-supported providers (maskea's
     // .wrap() is provider-agnostic; these two are just as first-class as
     // the three above), previously entirely absent from this list.
     checkProviderConnection("Groq", "GROQ_API_KEY", "https://api.groq.com/openai/v1/models", (k) => ({ Authorization: `Bearer ${k}` })),
@@ -208,6 +208,6 @@ export async function doctor(): Promise<void> {
   console.log(`\n${pc.bold("Health Score:")} ${scoreText}`)
 
   if (isTelemetryEnabled()) {
-    console.log(pc.dim("\nAnonymous usage statistics help improve KlaroShield. No prompts, responses or secrets are ever sent. Disable anytime: npx klaro telemetry disable"))
+    console.log(pc.dim("\nAnonymous usage statistics help improve maskea. No prompts, responses or secrets are ever sent. Disable anytime: npx maskea telemetry disable"))
   }
 }

@@ -1,7 +1,7 @@
 import { defineConfig } from "vitest/config"
 
 // Every test file's beforeEach/afterEach reads and rmSync's the SAME
-// .klaro/ directory (relative to process.cwd(), which local-store.ts
+// .maskea/ directory (relative to process.cwd(), which local-store.ts
 // hardcodes -- correct for the real SDK, but means test files racing in
 // parallel can rmSync a directory another file is mid-write to).
 // Confirmed live: an intermittent failure in explain.test.ts that

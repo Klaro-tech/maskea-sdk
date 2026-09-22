@@ -1,13 +1,13 @@
 {
-  "name": "@klaroshield/sdk",
-  "version": "0.7.0",
+  "name": "@maskea/sdk",
+  "version": "1.0.0",
   "description": "The AI Runtime every AI application installs on Day 1 -- retries, budget control, secret/PII redaction, structured output validation, and local logging for LLM calls. Zero required cloud account.",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "klaro": "./dist/cli/index.js"
+    "maskea": "./dist/cli/index.js"
   },
   "files": [
     "dist"
@@ -45,10 +45,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Klaro-tech/klaroshield-sdk.git"
+    "url": "git+https://github.com/Klaro-tech/maskea-sdk.git"
   },
   "homepage": "https://klaro.services/klaroshield",
   "bugs": {
-    "url": "https://github.com/Klaro-tech/klaroshield-sdk/issues"
+    "url": "https://github.com/Klaro-tech/maskea-sdk/issues"
   }
 }

@@ -10,7 +10,7 @@ import type { KlaroContext, Middleware } from "./types.js"
  * runs entirely in-process, per the "SDK must continue to provide value
  * even if the customer never creates a cloud account" principle.
  */
-export class Klaro {
+export class Maskea {
   private readonly middlewares: Middleware[] = []
 
   use(mw: Middleware<any, any>): this {

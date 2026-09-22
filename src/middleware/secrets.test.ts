@@ -1,19 +1,19 @@
 import { describe, it, expect } from "vitest"
-import { Klaro } from "../klaro.js"
+import { Maskea } from "../maskea.js"
 import { secrets } from "./secrets.js"
 
 describe("secrets middleware", () => {
   it("redacts secrets in the outbound request", async () => {
-    const klaro = new Klaro().use(secrets({ mode: "mask" }))
-    const wrapped = klaro.wrap(async (arg: { text: string }) => ({ echo: arg.text }))
+    const maskea = new Maskea().use(secrets({ mode: "mask" }))
+    const wrapped = maskea.wrap(async (arg: { text: string }) => ({ echo: arg.text }))
     const result = await wrapped({ text: "key sk-abcdefghijklmnopqrstuvwxyz123456" })
     expect(result.echo).not.toContain("sk-abcdefghijklmnopqrstuvwxyz123456")
     expect(result.echo).toContain("[REDACTED_OPENAI_KEY]")
   })
 
   it("redacts secrets in the provider's response, not just the request", async () => {
-    const klaro = new Klaro().use(secrets({ mode: "mask" }))
-    const wrapped = klaro.wrap(async () => ({
+    const maskea = new Maskea().use(secrets({ mode: "mask" }))
+    const wrapped = maskea.wrap(async () => ({
       choices: [{ message: { content: "Your key is sk-ABCDEF1234567890ABCDEF1234567890" } }],
     }))
     const result = await wrapped()
@@ -23,8 +23,8 @@ describe("secrets middleware", () => {
   })
 
   it("block mode throws on a secret found in the response", async () => {
-    const klaro = new Klaro().use(secrets({ mode: "block" }))
-    const wrapped = klaro.wrap(async () => ({ text: "AKIAABCDEFGHIJKLMNOP" }))
+    const maskea = new Maskea().use(secrets({ mode: "block" }))
+    const wrapped = maskea.wrap(async () => ({ text: "AKIAABCDEFGHIJKLMNOP" }))
     await expect(wrapped()).rejects.toThrow(/secret\(s\) detected in the provider's response/)
   })
 })

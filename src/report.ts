@@ -6,7 +6,7 @@ export interface ReportData extends DashboardData {
   sdkVersion: string
 }
 
-/** Same computation as the dashboard/klaro stats -- generateReport() doesn't re-derive anything, just adds a timestamp/version stamp on top of loadDashboardData()'s real numbers. */
+/** Same computation as the dashboard/maskea stats -- generateReport() doesn't re-derive anything, just adds a timestamp/version stamp on top of loadDashboardData()'s real numbers. */
 export function generateReport(): ReportData {
   const data = loadDashboardData()
   return { ...data, generatedAt: new Date().toISOString(), sdkVersion: sdkVersion() }
@@ -18,9 +18,9 @@ function fmtCost(n: number): string {
 
 export function renderMarkdown(r: ReportData): string {
   const lines: string[] = []
-  lines.push(`# KlaroShield AI Runtime Report`)
+  lines.push(`# maskea AI Runtime Report`)
   lines.push(``)
-  lines.push(`Generated ${r.generatedAt} — @klaroshield/sdk v${r.sdkVersion}`)
+  lines.push(`Generated ${r.generatedAt} — @maskea/sdk v${r.sdkVersion}`)
   lines.push(``)
   lines.push(`## Summary`)
   lines.push(``)
@@ -73,7 +73,7 @@ export function renderMarkdown(r: ReportData): string {
       ].filter(Boolean).join(", ") || "—"
       lines.push(`| ${new Date(req.timestamp).toLocaleString()} | ${req.ok ? "ok" : "failed"} | ${req.durationMs}ms | ${badges} |`)
     }
-    if (r.requests.length > 20) lines.push(``, `_...and ${r.requests.length - 20} more. Full data: .klaro/logs.jsonl_`)
+    if (r.requests.length > 20) lines.push(``, `_...and ${r.requests.length - 20} more. Full data: .maskea/logs.jsonl_`)
   }
   lines.push(``)
 
@@ -94,7 +94,7 @@ export function renderHtml(r: ReportData): string {
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>KlaroShield AI Runtime Report</title>
+<title>maskea AI Runtime Report</title>
 <style>
   body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 20px; color: #1a1a2e; }
   h1 { font-size: 22px; }
@@ -105,8 +105,8 @@ export function renderHtml(r: ReportData): string {
 </style>
 </head>
 <body>
-<h1>KlaroShield AI Runtime Report</h1>
-<p class="meta">Generated ${r.generatedAt} — @klaroshield/sdk v${r.sdkVersion}</p>
+<h1>maskea AI Runtime Report</h1>
+<p class="meta">Generated ${r.generatedAt} — @maskea/sdk v${r.sdkVersion}</p>
 
 <table>
 <tr><th>Health Score</th><td>${r.healthScore}/100</td></tr>

@@ -12,7 +12,7 @@ interface BudgetRecord {
 
 /**
  * Estimated monthly savings, grounded in this project's OWN recorded
- * spend (.klaro/budget.jsonl), not a made-up figure -- if there's no
+ * spend (.maskea/budget.jsonl), not a made-up figure -- if there's no
  * recorded spend yet, this section is skipped honestly rather than
  * inventing a number.
  */

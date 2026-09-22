@@ -1,5 +1,5 @@
-// PDF export for `klaro report --format pdf` -- same pdf-lib drawing
-// style as klaro-services' lib/sentinel/reports/*-pdf.ts builders (simple
+// PDF export for `maskea report --format pdf` -- same pdf-lib drawing
+// style as maskea-services' lib/sentinel/reports/*-pdf.ts builders (simple
 // text/rule/newline helpers, page-break-aware). Pure function: takes the
 // same ReportData generateReport() already computes for md/json/html, no
 // re-derivation, no new data source.
@@ -43,10 +43,10 @@ export async function renderPdf(r: ReportData): Promise<Uint8Array> {
   }
 
   // Header
-  t("KlaroShield", ML, 20, bold, PURPLE)
+  t("maskea", ML, 20, bold, PURPLE)
   t("AI Runtime Report", ML, 12, font, GREY)
   nl(18)
-  t(`Generated ${new Date(r.generatedAt).toLocaleString()} — @klaroshield/sdk v${r.sdkVersion}`, ML, 9, font, GREY)
+  t(`Generated ${new Date(r.generatedAt).toLocaleString()} — @maskea/sdk v${r.sdkVersion}`, ML, 9, font, GREY)
   nl(22)
   rule()
   nl(24)
@@ -124,7 +124,7 @@ export async function renderPdf(r: ReportData): Promise<Uint8Array> {
     }
     if (r.requests.length > 30) {
       ensure(16)
-      t(`...and ${r.requests.length - 30} more. Full data: .klaro/logs.jsonl`, ML, 9, font, GREY)
+      t(`...and ${r.requests.length - 30} more. Full data: .maskea/logs.jsonl`, ML, 9, font, GREY)
     }
   }
 

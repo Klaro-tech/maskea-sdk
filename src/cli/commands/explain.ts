@@ -14,7 +14,7 @@ interface LogRecord {
 
 /**
  * Narrates a call's full attempt history, most recent call by default (or
- * a specific one by callId / its 8-char prefix, matching what `klaro
+ * a specific one by callId / its 8-char prefix, matching what `maskea
  * inspect` prints). retries() sits OUTSIDE logging() in the recommended
  * pipeline order, so a retried call's inner chain -- including logging()
  * -- runs once per attempt, meaning multiple records share one callId,
@@ -25,7 +25,7 @@ interface LogRecord {
 export function explain(callIdPrefix?: string): void {
   const logs = readJsonLines<LogRecord>("logs")
   if (logs.length === 0) {
-    console.log("No calls recorded yet in .klaro/logs.jsonl.")
+    console.log("No calls recorded yet in .maskea/logs.jsonl.")
     return
   }
 
@@ -34,14 +34,14 @@ export function explain(callIdPrefix?: string): void {
     : logs[logs.length - 1]?.callId
 
   if (!targetId) {
-    console.log(`No call found matching "${callIdPrefix}". Run \`klaro inspect\` to see recent call ids.`)
+    console.log(`No call found matching "${callIdPrefix}". Run \`maskea inspect\` to see recent call ids.`)
     return
   }
 
   const attempts = logs.filter((l) => l.callId === targetId).sort((a, b) => a.attempt - b.attempt)
   const final = attempts[attempts.length - 1]
 
-  console.log(`${pc.bold("klaro explain")} — call ${targetId.slice(0, 8)} (${new Date(final.timestamp).toLocaleString()})\n`)
+  console.log(`${pc.bold("maskea explain")} — call ${targetId.slice(0, 8)} (${new Date(final.timestamp).toLocaleString()})\n`)
 
   const steps: string[] = []
 

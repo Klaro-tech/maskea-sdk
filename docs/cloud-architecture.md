@@ -1,7 +1,7 @@
-# Klaro Cloud — Product Architecture (Session 2)
+# Maskea Cloud — Product Architecture (Session 2)
 
 Architecture decisions only — no code in this document. Written to be
-consistent with Klaro's existing infrastructure (Supabase, Razorpay,
+consistent with Maskea's existing infrastructure (Supabase, Razorpay,
 the same multi-tenant patterns already used by Sentinel/Consentra)
 rather than inventing a new stack, since every extra platform is
 operational cost with no product benefit to the customer.
@@ -12,13 +12,13 @@ operational cost with no product benefit to the customer.
 
 The SDK is 100% local by design (Session 1's honesty constraint depends
 on this staying true). Cloud is an **opt-in sync target**: the SDK
-already writes structured data to `.klaro/*.jsonl` locally; Cloud's job
-is to also send that data to a Klaro-hosted API, and to be the read side
+already writes structured data to `.maskea/*.jsonl` locally; Cloud's job
+is to also send that data to a Maskea-hosted API, and to be the read side
 for anything that needs to exist outside one developer's laptop (team
 dashboards, cross-project budget aggregation, shared alerts).
 
 **Hard boundary, stated explicitly so nobody accidentally breaks it
-later:** the SDK must never require a network call to a Klaro server to
+later:** the SDK must never require a network call to a Maskea server to
 function. Cloud sync is `.use(cloudSync({ apiKey }))` as an ADDITIONAL
 middleware a paying customer adds to their existing chain — never a
 replacement for local logging, never something the free tier's
@@ -29,12 +29,12 @@ retries/budget/secrets/pii middleware silently depends on.
 Reuses the shape already defined by the SDK's local storage, not a
 redesigned schema:
 
-- `projects` — one row per `klaro.config` a customer has connected.
+- `projects` — one row per `maskea.config` a customer has connected.
   Owned by a `workspace_id` (see auth below).
-- `calls` — one row per `.klaro/logs.jsonl` record synced up. Same
+- `calls` — one row per `.maskea/logs.jsonl` record synced up. Same
   fields (callId, attempt, durationMs, ok, error, secretHits, piiHits,
   timestamp) plus `project_id`.
-- `spend` — mirrors `.klaro/budget.jsonl`, one row per recorded cost,
+- `spend` — mirrors `.maskea/budget.jsonl`, one row per recorded cost,
   plus `project_id`.
 - `workspaces` — the billing/team unit. A workspace has a plan (from
   the 4 tiers), members, and owns 1+ projects.
@@ -63,16 +63,16 @@ principle:
 
 ## 4. Project registration flow
 
-1. `klaro cloud login` (new CLI command, not yet built) opens a browser
+1. `maskea cloud login` (new CLI command, not yet built) opens a browser
    to the Cloud dashboard's login page.
-2. Once logged in, `klaro cloud link` registers the current directory's
-   `klaro.config` as a project under the logged-in workspace, writes the
-   issued project API key to `.klaro/cloud.json` (gitignored by
+2. Once logged in, `maskea cloud link` registers the current directory's
+   `maskea.config` as a project under the logged-in workspace, writes the
+   issued project API key to `.maskea/cloud.json` (gitignored by
    default — the scaffold's `.gitignore` needs this added).
 3. Developer adds `.use(cloudSync())` to their config, which reads the
-   key from `.klaro/cloud.json` automatically — no manual key-pasting
+   key from `.maskea/cloud.json` automatically — no manual key-pasting
    into code required if this flow is used, though manual `apiKey`
-   config is the fallback for CI/environments without a local `klaro
+   config is the fallback for CI/environments without a local `maskea
    cloud link` step.
 
 ## 5. Sync model
@@ -81,14 +81,14 @@ principle:
   buffers records in memory and flushes on an interval (default 30s) or
   when the buffer hits a size cap — never blocks the actual AI call
   waiting on a sync request, since that would violate "never depends on
-  cloud availability" the moment Klaro's own API has a bad day.
+  cloud availability" the moment Maskea's own API has a bad day.
 - **Sync failure is silent-degrade, logged locally, never thrown.**
   Exactly the same non-blocking discipline the local middleware already
   uses for its own internal failures (e.g. budget()'s "unrecognized
   model, skip silently" rule) — the standard should be Cloud sync
   failing is invisible to the developer's actual AI call, always.
 - **No pull sync to the SDK.** Remote configuration (a Developer-tier
-  feature) means the DASHBOARD can push config changes that `klaro cloud
+  feature) means the DASHBOARD can push config changes that `maskea cloud
   link`-ed projects pick up on their next sync interval, not that the
   SDK actively polls Cloud for instructions on every call — polling on
   every call would reintroduce the exact latency/availability dependency
@@ -96,9 +96,9 @@ principle:
 
 ## 6. Billing
 
-Razorpay, matching every other Klaro product (Sentinel/Consentra/Books)
+Razorpay, matching every other Maskea product (Sentinel/Consentra/Books)
 — the 6 plans already created live in Session 1's companion pricing work
-(`klaro repo lib/razorpay-plans.ts`, `klaroshield_v1_*` keys) are the
+(`maskea repo lib/razorpay-plans.ts`, `klaroshield_v1_*` keys) are the
 real billing objects to wire up, not placeholders. Workspace-level
 subscription, not per-project — a Team-tier workspace's plan governs
 all projects under it.
@@ -135,9 +135,9 @@ appearing mid-feature.
 ## Build order
 
 1. `workspaces`/`projects` tables + Supabase Auth wiring (reuse existing
-   Klaro auth patterns) — no new UI yet, just the data layer.
+   Maskea auth patterns) — no new UI yet, just the data layer.
 2. `cloudSync()` middleware in the SDK (the only new SDK-side code Cloud
-   requires) + `klaro cloud login`/`klaro cloud link` CLI commands.
+   requires) + `maskea cloud login`/`maskea cloud link` CLI commands.
 3. Minimal dashboard: project list, per-project call/spend view (this is
    the actual MVP — "can I see my data" before any team/alert features).
 4. Team features (shared workspaces, alerts) once the MVP proves the

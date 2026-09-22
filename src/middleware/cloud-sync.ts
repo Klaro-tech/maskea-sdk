@@ -1,15 +1,15 @@
-// Klaro Cloud sync middleware -- the only new SDK-side code Cloud
+// Maskea Cloud sync middleware -- the only new SDK-side code Cloud
 // requires per cloud-architecture.md's build order step 2. Additive:
 // buffers each call's real record (same shape logging()/budget() already
 // write locally) and pushes it to Cloud on an interval, batched,
 // non-blocking. Never required for the SDK to function -- the hard
 // boundary from cloud-architecture.md §1: "the SDK must never require a
-// network call to a Klaro server to function."
+// network call to a Maskea server to function."
 import type { Middleware } from "../types.js"
 import { readJson } from "../storage/local-store.js"
 
 export interface CloudSyncOptions {
-  /** Project API key from `klaro cloud link` (read from .klaro/cloud.json if omitted) or CI's own env var -- see docs. */
+  /** Project API key from `maskea cloud link` (read from .maskea/cloud.json if omitted) or CI's own env var -- see docs. */
   apiKey?: string
   apiBaseUrl?: string
   /** How often to flush the buffer, in ms. Default 30000 (30s) -- matches cloud-architecture.md §5's stated default. */
@@ -38,7 +38,7 @@ interface CloudLinkConfig {
   projectKey?: string
 }
 
-const DEFAULT_API_BASE_URL = "https://klaro.services"
+const DEFAULT_API_BASE_URL = "https://maskea.services"
 
 export function cloudSync(options: CloudSyncOptions = {}): Middleware {
   const apiBaseUrl = (options.apiBaseUrl ?? DEFAULT_API_BASE_URL).replace(/\/+$/, "")
@@ -66,7 +66,7 @@ export function cloudSync(options: CloudSyncOptions = {}): Middleware {
     const spend = spendBuffer.splice(0, spendBuffer.length)
 
     try {
-      await fetch(`${apiBaseUrl}/api/klaroshield/cloud/sync`, {
+      await fetch(`${apiBaseUrl}/api/maskea/cloud/sync`, {
         method: "POST",
         headers: { "content-type": "application/json", "x-api-key": apiKey },
         body: JSON.stringify({ calls, spend }),

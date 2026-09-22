@@ -4,18 +4,18 @@
 //   ANTHROPIC_API_KEY=sk-ant-... node --import tsx examples/anthropic.ts
 import Anthropic from "@anthropic-ai/sdk"
 import type { Message } from "@anthropic-ai/sdk/resources/messages"
-import { Klaro, retries, budget, secrets, pii, logging } from "../src/index.js"
+import { Maskea, retries, budget, secrets, pii, logging } from "../src/index.js"
 
 const anthropic = new Anthropic()
 
-const klaro = new Klaro()
+const maskea = new Maskea()
   .use(retries({ max: 3, backoff: "exponential" }))
   .use(budget({ maxMonthlyUsd: 50 }))
   .use(secrets({ mode: "mask" }))
   .use(pii({ mode: "mask" }))
   .use(logging({ format: "pretty" }))
 
-const messages = klaro.wrap(anthropic.messages.create.bind(anthropic.messages))
+const messages = maskea.wrap(anthropic.messages.create.bind(anthropic.messages))
 
 async function main() {
   // See examples/openai.ts's comment -- same wrap()-through-.bind()

@@ -39,7 +39,7 @@ export function pii(options: PiiOptions = {}): Middleware {
       ctx.meta.piiHits = hits
       if (mode === "block") {
         throw new Error(
-          `[klaroshield] Blocked call: PII detected in the request (${hits.map((h) => `${h.rule}×${h.count}`).join(", ")}). ` +
+          `[maskea] Blocked call: PII detected in the request (${hits.map((h) => `${h.rule}×${h.count}`).join(", ")}). ` +
             `Set pii({ mode: "mask" }) to redact instead of blocking.`
         )
       }
@@ -57,7 +57,7 @@ export function pii(options: PiiOptions = {}): Middleware {
       ctx.meta.piiHitsResponse = responseHits
       if (mode === "block") {
         throw new Error(
-          `[klaroshield] Blocked call: PII detected in the provider's response (${responseHits.map((h) => `${h.rule}×${h.count}`).join(", ")}). ` +
+          `[maskea] Blocked call: PII detected in the provider's response (${responseHits.map((h) => `${h.rule}×${h.count}`).join(", ")}). ` +
             `Set pii({ mode: "mask" }) to redact instead of blocking.`
         )
       }

@@ -6,7 +6,7 @@ export interface RedactionRule {
   /**
    * "redact" (default, omit this field for existing behavior): replace the
    * match with `replacement`, never persist the matched value.
-   * "flag": KlaroShield vuln-mgmt phase 3 -- record that this rule matched
+   * "flag": maskea vuln-mgmt phase 3 -- record that this rule matched
    * WITHOUT altering the text. Built for vulnerable-dependency signatures
    * (e.g. a code-review call naming `lodash@4.17.15`): redacting a
    * vulnerable package name the same way a secret gets redacted would

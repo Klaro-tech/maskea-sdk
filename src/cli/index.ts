@@ -26,13 +26,13 @@ const pkg = JSON.parse(readFileSync(join(here, "..", "..", "package.json"), "utf
 const program = new Command()
 
 program
-  .name("klaro")
-  .description("KlaroShield CLI — local diagnostics for the AI runtime, no cloud account required.")
+  .name("maskea")
+  .description("maskea CLI — local diagnostics for the AI runtime, no cloud account required.")
   .version(pkg.version)
 
 program
   .command("init")
-  .description("Scaffold a klaro.config.ts in the current project")
+  .description("Scaffold a maskea.config.ts in the current project")
   .action(init)
 
 program
@@ -53,7 +53,7 @@ program
 
 program
   .command("version")
-  .description("Show the installed klaroshield SDK/CLI version")
+  .description("Show the installed maskea SDK/CLI version")
   .action(version)
 
 program
@@ -86,7 +86,7 @@ program
 
 const cloudCmd = program
   .command("cloud")
-  .description("Klaro Cloud — opt-in sync for team dashboards, cross-project budgets, and alerts. Never required for the SDK to function.")
+  .description("Maskea Cloud — opt-in sync for team dashboards, cross-project budgets, and alerts. Never required for the SDK to function.")
 
 cloudCmd
   .command("login")

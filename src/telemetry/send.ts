@@ -19,7 +19,7 @@ export type TelemetryEvent =
   | "cloud_login"
   | "cloud_project_connected"
 
-const DEFAULT_ENDPOINT = "https://klaro.services/api/klaroshield/telemetry"
+const DEFAULT_ENDPOINT = "https://maskea.services/api/maskea/telemetry"
 
 /**
  * Anonymous operational metadata only -- installationId/projectId (random

@@ -15,7 +15,7 @@ export interface VulnSignatureOptions {
 
 // Deliberately a small, honestly-scoped list of literal, well-known
 // critical-CVE name+version-range patterns -- NOT a general SCA/CVE-range
-// engine. No live vulnerable-package feed is wired into KlaroShield today
+// engine. No live vulnerable-package feed is wired into maskea today
 // (Sentinel's CISA KEV client, a separate product/repo, isn't shared
 // cross-repo) -- claiming broader coverage than this would misrepresent
 // what actually runs. Expand this list deliberately over time, the same

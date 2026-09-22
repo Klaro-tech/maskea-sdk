@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest"
 import { rmSync, existsSync } from "node:fs"
-import { Klaro } from "./klaro.js"
+import { Maskea } from "./maskea.js"
 import { retries } from "./middleware/retries.js"
 import { secrets } from "./middleware/secrets.js"
 import { pii } from "./middleware/pii.js"
@@ -8,7 +8,7 @@ import { budget } from "./middleware/budget.js"
 import { logging } from "./middleware/logging.js"
 import { readJsonLines, readJson } from "./storage/local-store.js"
 
-const KLARO_DIR = new URL("../.klaro", import.meta.url).pathname
+const KLARO_DIR = new URL("../.maskea", import.meta.url).pathname
 
 beforeEach(() => {
   if (existsSync(KLARO_DIR)) rmSync(KLARO_DIR, { recursive: true, force: true })
@@ -17,18 +17,18 @@ afterEach(() => {
   if (existsSync(KLARO_DIR)) rmSync(KLARO_DIR, { recursive: true, force: true })
 })
 
-describe("Klaro middleware pipeline", () => {
+describe("Maskea middleware pipeline", () => {
   it("runs a simple call through the chain unmodified when nothing triggers", async () => {
-    const klaro = new Klaro().use(logging({ format: "silent" }))
-    const wrapped = klaro.wrap(async (name: string) => `hello ${name}`)
+    const maskea = new Maskea().use(logging({ format: "silent" }))
+    const wrapped = maskea.wrap(async (name: string) => `hello ${name}`)
     const result = await wrapped("world")
     expect(result).toBe("hello world")
   })
 
   it("retries on a retryable error and eventually succeeds", async () => {
     let attempts = 0
-    const klaro = new Klaro().use(retries({ max: 3, baseDelayMs: 1 }))
-    const wrapped = klaro.wrap(async () => {
+    const maskea = new Maskea().use(retries({ max: 3, baseDelayMs: 1 }))
+    const wrapped = maskea.wrap(async () => {
       attempts++
       if (attempts < 3) {
         const err: any = new Error("rate limited")
@@ -44,8 +44,8 @@ describe("Klaro middleware pipeline", () => {
 
   it("does not retry a non-retryable error", async () => {
     let attempts = 0
-    const klaro = new Klaro().use(retries({ max: 3, baseDelayMs: 1 }))
-    const wrapped = klaro.wrap(async () => {
+    const maskea = new Maskea().use(retries({ max: 3, baseDelayMs: 1 }))
+    const wrapped = maskea.wrap(async () => {
       attempts++
       const err: any = new Error("bad request")
       err.status = 400
@@ -57,8 +57,8 @@ describe("Klaro middleware pipeline", () => {
 
   it("redacts a secret from the args before the call runs", async () => {
     let seenArgs: unknown
-    const klaro = new Klaro().use(secrets())
-    const wrapped = klaro.wrap(async (messages: { role: string; content: string }[]) => {
+    const maskea = new Maskea().use(secrets())
+    const wrapped = maskea.wrap(async (messages: { role: string; content: string }[]) => {
       seenArgs = messages
       return "response"
     })
@@ -68,15 +68,15 @@ describe("Klaro middleware pipeline", () => {
   })
 
   it("blocks a call when secrets mode is 'block'", async () => {
-    const klaro = new Klaro().use(secrets({ mode: "block" }))
-    const wrapped = klaro.wrap(async (s: string) => s)
+    const maskea = new Maskea().use(secrets({ mode: "block" }))
+    const wrapped = maskea.wrap(async (s: string) => s)
     await expect(wrapped("sk-proj-abcdefghijklmnopqrstuvwxyz1234567890")).rejects.toThrow(/Blocked call/)
   })
 
   it("redacts PII (email) from args", async () => {
     let seenArgs: unknown
-    const klaro = new Klaro().use(pii({ types: ["email"] }))
-    const wrapped = klaro.wrap(async (s: string) => {
+    const maskea = new Maskea().use(pii({ types: ["email"] }))
+    const wrapped = maskea.wrap(async (s: string) => {
       seenArgs = s
       return "ok"
     })
@@ -85,8 +85,8 @@ describe("Klaro middleware pipeline", () => {
   })
 
   it("records estimated cost from OpenAI-shaped usage and persists it locally", async () => {
-    const klaro = new Klaro().use(budget({ maxMonthlyUsd: 1000 }))
-    const wrapped = klaro.wrap(async () => ({
+    const maskea = new Maskea().use(budget({ maxMonthlyUsd: 1000 }))
+    const wrapped = maskea.wrap(async () => ({
       model: "gpt-4o-mini",
       usage: { prompt_tokens: 1000, completion_tokens: 500 },
     }))
@@ -96,20 +96,20 @@ describe("Klaro middleware pipeline", () => {
     expect(spend[0].costUsd).toBeGreaterThan(0)
     // Real regression coverage for a bug caught while building the AI
     // Doctor cost-recommendation feature: budget() persisted costUsd but
-    // silently dropped the model field, so anything reading .klaro/budget
+    // silently dropped the model field, so anything reading .maskea/budget
     // to recommend a cheaper model would never find one in real usage.
     expect(spend[0].model).toBe("gpt-4o-mini")
   })
 
   it("persists the configured budget cap for other tools (e.g. the CLI) to read", async () => {
-    new Klaro().use(budget({ maxMonthlyUsd: 42 }))
+    new Maskea().use(budget({ maxMonthlyUsd: 42 }))
     const config = readJson<{ maxMonthlyUsd: number }>("budget-config", { maxMonthlyUsd: 0 })
     expect(config.maxMonthlyUsd).toBe(42)
   })
 
   it("throws once monthly spend exceeds the cap", async () => {
-    const klaro = new Klaro().use(budget({ maxMonthlyUsd: 0.0001 }))
-    const wrapped = klaro.wrap(async () => ({
+    const maskea = new Maskea().use(budget({ maxMonthlyUsd: 0.0001 }))
+    const wrapped = maskea.wrap(async () => ({
       model: "gpt-4o",
       usage: { prompt_tokens: 100000, completion_tokens: 100000 },
     }))
@@ -119,7 +119,7 @@ describe("Klaro middleware pipeline", () => {
 
   it("composes multiple middleware in the right order (outermost .use() sees the call first)", async () => {
     const order: string[] = []
-    const klaro = new Klaro()
+    const maskea = new Maskea()
       .use(async (args, next) => {
         order.push("a-before")
         const r = await next(args)
@@ -132,7 +132,7 @@ describe("Klaro middleware pipeline", () => {
         order.push("b-after")
         return r
       })
-    const wrapped = klaro.wrap(async () => {
+    const wrapped = maskea.wrap(async () => {
       order.push("call")
       return "done"
     })

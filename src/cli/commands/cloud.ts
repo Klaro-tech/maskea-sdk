@@ -4,8 +4,8 @@ import pc from "picocolors"
 import { readJson, writeJson } from "../../storage/local-store.js"
 import { sendTelemetry } from "../../telemetry/send.js"
 
-const DEFAULT_API_BASE_URL = "https://klaro.services"
-const DASHBOARD_URL = "https://klaro.services/klaroshield/cloud"
+const DEFAULT_API_BASE_URL = "https://maskea.services"
+const DASHBOARD_URL = "https://maskea.services/maskea/cloud"
 
 // Same minimal cross-platform browser opener as dashboard.ts -- kept
 // local rather than extracted to a shared util for one five-line
@@ -25,7 +25,7 @@ interface CloudLinkConfig {
 }
 
 /**
- * `klaro cloud login` -- opens the Cloud dashboard in the default browser
+ * `maskea cloud login` -- opens the Cloud dashboard in the default browser
  * per cloud-architecture.md §4 step 1. There's no CLI-side session to
  * establish here: workspace login only ever happens in the browser
  * (§3, "this is the ONLY place a human logs in; the SDK itself never
@@ -35,13 +35,13 @@ interface CloudLinkConfig {
 export function cloudLogin(): void {
   sendTelemetry("cloud_login", { cliCommand: "cloud login" })
   console.log(`Opening ${pc.cyan(DASHBOARD_URL)} — sign in, then create a project and copy its API key.`)
-  console.log(pc.dim("Next: klaro cloud link --key <project-api-key>"))
+  console.log(pc.dim("Next: maskea cloud link --key <project-api-key>"))
   openBrowser(DASHBOARD_URL)
 }
 
 /**
- * `klaro cloud link` -- registers this directory for Cloud sync by
- * saving a project API key to .klaro/cloud.json, per §4 step 2. No
+ * `maskea cloud link` -- registers this directory for Cloud sync by
+ * saving a project API key to .maskea/cloud.json, per §4 step 2. No
  * device-code/OAuth exchange (real, scoped-down v1 of the doc's flow):
  * the key is created in the dashboard (opened by `cloud login`) and
  * pasted here, either via --key or an interactive prompt -- the same
@@ -69,7 +69,7 @@ export async function cloudLink(options: { key?: string; apiUrl?: string }): Pro
   // 400 means a valid key with nothing to sync yet -- both distinguish
   // cleanly from a network/config problem.
   try {
-    const res = await fetch(`${apiBaseUrl}/api/klaroshield/cloud/sync`, {
+    const res = await fetch(`${apiBaseUrl}/api/maskea/cloud/sync`, {
       method: "POST",
       headers: { "content-type": "application/json", "x-api-key": key },
       body: JSON.stringify({ calls: [], spend: [] }),
@@ -87,14 +87,14 @@ export async function cloudLink(options: { key?: string; apiUrl?: string }): Pro
   const config: CloudLinkConfig = { projectKey: key, linkedAt: new Date().toISOString() }
   writeJson("cloud", config)
   sendTelemetry("cloud_project_connected", { cliCommand: "cloud link" })
-  console.log(`${pc.green("✓")} Linked. Add ${pc.bold(".use(cloudSync())")} to your Klaro config to start syncing.`)
-  console.log(pc.dim("Key saved to .klaro/cloud.json — make sure .klaro/ is gitignored."))
+  console.log(`${pc.green("✓")} Linked. Add ${pc.bold(".use(cloudSync())")} to your Maskea config to start syncing.`)
+  console.log(pc.dim("Key saved to .maskea/cloud.json — make sure .maskea/ is gitignored."))
 }
 
 export function cloudStatus(): void {
   const config = readJson<CloudLinkConfig>("cloud", {})
   if (!config.projectKey) {
-    console.log(`${pc.yellow("○")} Not linked. Run ${pc.bold("klaro cloud login")} then ${pc.bold("klaro cloud link")}.`)
+    console.log(`${pc.yellow("○")} Not linked. Run ${pc.bold("maskea cloud login")} then ${pc.bold("maskea cloud link")}.`)
     return
   }
   console.log(`${pc.green("✓")} Linked ${config.linkedAt ? `(since ${new Date(config.linkedAt).toLocaleString()})` : ""}`)

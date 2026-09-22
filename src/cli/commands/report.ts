@@ -7,10 +7,10 @@ import { sendTelemetry } from "../../telemetry/send.js"
 export type ReportFormat = "md" | "json" | "html" | "pdf"
 
 const DEFAULT_OUT: Record<ReportFormat, string> = {
-  md: "klaro-report.md",
-  json: "klaro-report.json",
-  html: "klaro-report.html",
-  pdf: "klaro-report.pdf",
+  md: "maskea-report.md",
+  json: "maskea-report.json",
+  html: "maskea-report.html",
+  pdf: "maskea-report.pdf",
 }
 
 export async function report(options: { format?: string; out?: string }): Promise<void> {

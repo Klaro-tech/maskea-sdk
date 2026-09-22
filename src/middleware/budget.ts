@@ -5,7 +5,7 @@ import { sendTelemetry } from "../telemetry/send.js"
 
 export interface BudgetOptions {
   maxMonthlyUsd: number
-  /** Only "local" exists in Release 1 -- Klaro Cloud can later aggregate budget across machines/lambdas, but that's an optional sync layer, not a requirement to use this middleware at all. */
+  /** Only "local" exists in Release 1 -- Maskea Cloud can later aggregate budget across machines/lambdas, but that's an optional sync layer, not a requirement to use this middleware at all. */
   storage?: "local"
   /** Called (not thrown) when a call pushes spend past the cap, so the developer decides what to do -- log it, alert, or still let requests through. Default: throws. */
   onExceeded?: (spentUsd: number, capUsd: number) => void
@@ -31,9 +31,9 @@ function monthToDateSpend(): number {
 
 export function budget(options: BudgetOptions): Middleware {
   sendTelemetry("middleware_budget_enabled")
-  // Persisted so CLI commands (klaro stats/doctor) can show "budget
+  // Persisted so CLI commands (maskea stats/doctor) can show "budget
   // remaining" and similar without needing to import the developer's own
-  // klaro.config.ts -- the config file is the source of truth while the
+  // maskea.config.ts -- the config file is the source of truth while the
   // process is running, this is just a mirror for tooling that runs as a
   // separate process later. Written once per middleware construction, not
   // per call -- the cap doesn't change mid-run.
@@ -52,7 +52,7 @@ export function budget(options: BudgetOptions): Middleware {
         options.onExceeded(spentSoFar, options.maxMonthlyUsd)
       } else {
         throw new Error(
-          `[klaroshield] Monthly budget exceeded: $${spentSoFar.toFixed(2)} spent of $${options.maxMonthlyUsd} cap. ` +
+          `[maskea] Monthly budget exceeded: $${spentSoFar.toFixed(2)} spent of $${options.maxMonthlyUsd} cap. ` +
             `Pass budget({ onExceeded }) to handle this instead of throwing.`
         )
       }
