@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto"
-import type { KlaroContext, Middleware } from "./types.js"
+import type { MaskeaContext, Middleware } from "./types.js"
 
 /**
  * Root of the middleware pipeline. `.use()` composes like Express; `.wrap()`
@@ -22,7 +22,7 @@ export class Maskea {
     fn: (...args: TArgs) => Promise<TResult>
   ): (...args: TArgs) => Promise<TResult> {
     return async (...args: TArgs): Promise<TResult> => {
-      const ctx: KlaroContext = {
+      const ctx: MaskeaContext = {
         callId: randomUUID(),
         startedAt: Date.now(),
         attempt: 1,

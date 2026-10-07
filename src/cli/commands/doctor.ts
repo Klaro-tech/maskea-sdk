@@ -65,7 +65,7 @@ function checkNodeVersion(): Check {
   }
 }
 
-function checkKlaroDir(): Check {
+function checkMaskeaDir(): Check {
   const dir = join(process.cwd(), ".maskea")
   return {
     name: ".maskea/ local storage",
@@ -190,7 +190,7 @@ export async function doctor(): Promise<void> {
   ])
   spinner.stop()
 
-  const checks: Check[] = [...localChecks, ...providerChecks, checkRetryHealth(), checkKlaroDir()]
+  const checks: Check[] = [...localChecks, ...providerChecks, checkRetryHealth(), checkMaskeaDir()]
 
   for (const c of checks) {
     const icon = c.ok ? pc.green("✓") : c.warn ? pc.yellow("⚠") : pc.red("✗")

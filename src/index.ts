@@ -1,5 +1,5 @@
 export { Maskea } from "./maskea.js"
-export type { KlaroContext, Middleware } from "./types.js"
+export type { MaskeaContext, Middleware } from "./types.js"
 
 export { retries, type RetriesOptions } from "./middleware/retries.js"
 export { budget, type BudgetOptions } from "./middleware/budget.js"

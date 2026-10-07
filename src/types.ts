@@ -8,7 +8,7 @@
 // wraps the developer's OWN call function, whatever provider it happens to
 // call -- the same pattern already used for Anthropic/OpenAI SDKs' own
 // request interceptors, just made composable.
-export type KlaroContext = {
+export type MaskeaContext = {
   /** Random per-call id, stable across the whole middleware chain for one call -- used to correlate log lines, budget checks, and retries for the same request. */
   callId: string
   startedAt: number
@@ -18,10 +18,10 @@ export type KlaroContext = {
   meta: Record<string, unknown>
 }
 
-export type KlaroNext<TArgs extends unknown[], TResult> = (args: TArgs) => Promise<TResult>
+export type MaskeaNext<TArgs extends unknown[], TResult> = (args: TArgs) => Promise<TResult>
 
 export type Middleware<TArgs extends unknown[] = unknown[], TResult = unknown> = (
   args: TArgs,
-  next: KlaroNext<TArgs, TResult>,
-  ctx: KlaroContext
+  next: MaskeaNext<TArgs, TResult>,
+  ctx: MaskeaContext
 ) => Promise<TResult>
