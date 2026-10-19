@@ -1,5 +1,5 @@
 {
-  "name": "@maskea/sdk",
+  "name": "@nopeatech/maskea",
   "version": "1.0.0",
   "description": "The AI Runtime every AI application installs on Day 1 -- retries, budget control, secret/PII redaction, structured output validation, and local logging for LLM calls. Zero required cloud account.",
   "license": "MIT",
@@ -7,10 +7,11 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "maskea": "./dist/cli/index.js"
+    "maskea": "dist/cli/index.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "!dist/**/*.test.*"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
