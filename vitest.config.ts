@@ -18,9 +18,9 @@ export default defineConfig({
     // silently hit the real production telemetry endpoint on every
     // `vitest run`, including on every contributor's machine and every CI
     // run. Found live: ran the suite once before adding this and confirmed
-    // outbound fetches were firing. KLARO_TELEMETRY=0 always wins over
+    // outbound fetches were firing. MASKEA_TELEMETRY=0 always wins over
     // config, so this fully suppresses it; telemetry.test.ts overrides
     // this per-test where it specifically needs to exercise the opt-in path.
-    env: { KLARO_TELEMETRY: "0" },
+    env: { MASKEA_TELEMETRY: "0" },
   },
 })

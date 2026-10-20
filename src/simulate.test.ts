@@ -7,13 +7,13 @@ import { pii } from "./middleware/pii.js"
 import { logging } from "./middleware/logging.js"
 import { simulate, ALL_SCENARIOS } from "./simulate.js"
 
-const KLARO_DIR = new URL("../.maskea", import.meta.url).pathname
+const MASKEA_DIR = new URL("../.maskea", import.meta.url).pathname
 
 beforeEach(() => {
-  if (existsSync(KLARO_DIR)) rmSync(KLARO_DIR, { recursive: true, force: true })
+  if (existsSync(MASKEA_DIR)) rmSync(MASKEA_DIR, { recursive: true, force: true })
 })
 afterEach(() => {
-  if (existsSync(KLARO_DIR)) rmSync(KLARO_DIR, { recursive: true, force: true })
+  if (existsSync(MASKEA_DIR)) rmSync(MASKEA_DIR, { recursive: true, force: true })
 })
 
 describe("simulate", () => {

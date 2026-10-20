@@ -58,7 +58,7 @@ terminal capture on this page comes from an actual execution" standard:
 1. `maskea doctor` output (colored, real provider connectivity check)
 2. `maskea dashboard` running in a browser (localhost:3456)
 3. `maskea benchmark` comparing 2-3 real providers
-4. The recipes page (`maskea.services/maskea/recipes`) showing the
+4. The recipes page (`nopea.tech/maskea/recipes`) showing the
    category grid
 5. Maskea Cloud dashboard with a real synced project
 

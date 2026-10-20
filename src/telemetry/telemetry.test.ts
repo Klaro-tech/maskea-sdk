@@ -4,14 +4,14 @@ import { join } from "node:path"
 import { getOrCreateInstall, getOrCreateProject, isTelemetryEnabled, readTelemetryConfig, writeTelemetryConfig } from "./identity.js"
 import { sendTelemetry } from "./send.js"
 
-const KLARO_DIR = join(process.cwd(), ".maskea")
+const MASKEA_DIR = join(process.cwd(), ".maskea")
 
 beforeEach(() => {
-  rmSync(KLARO_DIR, { recursive: true, force: true })
+  rmSync(MASKEA_DIR, { recursive: true, force: true })
 })
 afterEach(() => {
-  rmSync(KLARO_DIR, { recursive: true, force: true })
-  delete process.env.KLARO_TELEMETRY
+  rmSync(MASKEA_DIR, { recursive: true, force: true })
+  delete process.env.MASKEA_TELEMETRY
 })
 
 describe("identity", () => {
@@ -43,20 +43,20 @@ describe("identity", () => {
     // ID (e.g. a hash of os.hostname()) would be deterministic across
     // runs on the same machine even after deleting install.json, which a
     // real UUID never is.
-    rmSync(KLARO_DIR, { recursive: true, force: true })
+    rmSync(MASKEA_DIR, { recursive: true, force: true })
     const { install: second } = getOrCreateInstall()
     expect(second.installationId).not.toBe(install.installationId)
   })
 
-  it("KLARO_TELEMETRY=0 disables regardless of config.json", () => {
+  it("MASKEA_TELEMETRY=0 disables regardless of config.json", () => {
     writeTelemetryConfig({ telemetry: true })
-    process.env.KLARO_TELEMETRY = "0"
+    process.env.MASKEA_TELEMETRY = "0"
     expect(isTelemetryEnabled()).toBe(false)
   })
 
-  it("KLARO_TELEMETRY=1 enables regardless of config.json", () => {
+  it("MASKEA_TELEMETRY=1 enables regardless of config.json", () => {
     writeTelemetryConfig({ telemetry: false })
-    process.env.KLARO_TELEMETRY = "1"
+    process.env.MASKEA_TELEMETRY = "1"
     expect(isTelemetryEnabled()).toBe(true)
   })
 
@@ -73,7 +73,7 @@ describe("identity", () => {
 
 describe("sendTelemetry", () => {
   it("makes no network call at all when telemetry is disabled", async () => {
-    process.env.KLARO_TELEMETRY = "0"
+    process.env.MASKEA_TELEMETRY = "0"
     const fetchSpy = vi.spyOn(globalThis, "fetch")
     sendTelemetry("doctor_run", { cliCommand: "doctor" })
     await new Promise((r) => setTimeout(r, 10))
@@ -82,7 +82,7 @@ describe("sendTelemetry", () => {
   })
 
   it("never includes prompt/response/secret-shaped fields in the payload", async () => {
-    process.env.KLARO_TELEMETRY = "1"
+    process.env.MASKEA_TELEMETRY = "1"
     // Pre-create install/project so this call doesn't also fire the
     // one-time sdk_installed/project_created events -- isolates the
     // payload check to a single, predictable POST.

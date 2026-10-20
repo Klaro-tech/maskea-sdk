@@ -5,13 +5,13 @@ import { retries } from "../../middleware/retries.js"
 import { logging } from "../../middleware/logging.js"
 import { explain } from "./explain.js"
 
-const KLARO_DIR = new URL("../../../.maskea", import.meta.url).pathname
+const MASKEA_DIR = new URL("../../../.maskea", import.meta.url).pathname
 
 beforeEach(() => {
-  if (existsSync(KLARO_DIR)) rmSync(KLARO_DIR, { recursive: true, force: true })
+  if (existsSync(MASKEA_DIR)) rmSync(MASKEA_DIR, { recursive: true, force: true })
 })
 afterEach(() => {
-  if (existsSync(KLARO_DIR)) rmSync(KLARO_DIR, { recursive: true, force: true })
+  if (existsSync(MASKEA_DIR)) rmSync(MASKEA_DIR, { recursive: true, force: true })
 })
 
 describe("explain", () => {

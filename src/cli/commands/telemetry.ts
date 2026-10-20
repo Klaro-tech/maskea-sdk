@@ -6,10 +6,10 @@ const NEVER_COLLECTED = ["Prompts", "Responses", "API keys", "Secrets", "PII"]
 
 export function telemetryStatus(): void {
   const enabled = isTelemetryEnabled()
-  const envOverride = process.env.KLARO_TELEMETRY === "0" || process.env.KLARO_TELEMETRY === "1"
+  const envOverride = process.env.MASKEA_TELEMETRY === "0" || process.env.MASKEA_TELEMETRY === "1"
 
   console.log(pc.bold("Telemetry"))
-  console.log(`\nStatus: ${enabled ? pc.green("Enabled") : pc.red("Disabled")}${envOverride ? pc.dim(" (set by KLARO_TELEMETRY env var)") : ""}`)
+  console.log(`\nStatus: ${enabled ? pc.green("Enabled") : pc.red("Disabled")}${envOverride ? pc.dim(" (set by MASKEA_TELEMETRY env var)") : ""}`)
 
   console.log(pc.bold("\nData collected:"))
   for (const item of COLLECTED) console.log(`${pc.green("✓")} ${item}`)

@@ -1,6 +1,6 @@
 {
   "name": "@nopeatech/maskea",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "The AI Runtime every AI application installs on Day 1 -- retries, budget control, secret/PII redaction, structured output validation, and local logging for LLM calls. Zero required cloud account.",
   "license": "MIT",
   "type": "module",
@@ -48,7 +48,7 @@
     "type": "git",
     "url": "git+https://github.com/Klaro-tech/maskea-sdk.git"
   },
-  "homepage": "https://klaro.services/klaroshield",
+  "homepage": "https://nopea.tech/maskea",
   "bugs": {
     "url": "https://github.com/Klaro-tech/maskea-sdk/issues"
   }

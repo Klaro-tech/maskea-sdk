@@ -4,8 +4,8 @@ import pc from "picocolors"
 import { readJson, writeJson } from "../../storage/local-store.js"
 import { sendTelemetry } from "../../telemetry/send.js"
 
-const DEFAULT_API_BASE_URL = "https://maskea.services"
-const DASHBOARD_URL = "https://maskea.services/maskea/cloud"
+const DEFAULT_API_BASE_URL = "https://nopea.tech"
+const DASHBOARD_URL = "https://nopea.tech/maskea/cloud"
 
 // Same minimal cross-platform browser opener as dashboard.ts -- kept
 // local rather than extracted to a shared util for one five-line

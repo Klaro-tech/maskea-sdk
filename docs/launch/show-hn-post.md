@@ -65,7 +65,7 @@ generic wrap (works, not deeply tested against every version), and
 there's no Python port yet if that's what you need.
 
 MIT licensed: https://github.com/Maskea-tech/maskea-sdk
-Docs: https://maskea.services/maskea/docs
-Live playground (no signup): https://maskea.services/maskea/playground
+Docs: https://nopea.tech/maskea/docs
+Live playground (no signup): https://nopea.tech/maskea/playground
 
 Happy to answer questions about the design tradeoffs.

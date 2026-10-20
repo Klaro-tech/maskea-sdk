@@ -93,8 +93,8 @@ npx maskea telemetry status    # see exactly what's collected
 npx maskea telemetry disable   # opt out -- the SDK stays fully functional
 ```
 
-or set `KLARO_TELEMETRY=0` in your environment, which always overrides
-`.maskea/config.json`. See [maskea.services/maskea/privacy](https://maskea.services/maskea/privacy) for the full policy.
+or set `MASKEA_TELEMETRY=0` in your environment, which always overrides
+`.maskea/config.json`. See [nopea.tech/maskea/privacy](https://nopea.tech/maskea/privacy) for the full policy.
 
 ## Middleware
 
@@ -104,12 +104,12 @@ or set `KLARO_TELEMETRY=0` in your environment, which always overrides
 - **`pii({ mode, types })`** — deep-scans for email/phone/SSN/credit card, masks or blocks.
 - **`validation({ schema, extractText, maxRetries })`** — re-runs the call if the response doesn't parse as JSON or fails a Zod-compatible schema's `safeParse`.
 - **`logging({ format })`** — `"pretty"` (colored stdout), `"json"`, or `"silent"` (still persists to `.maskea/logs.jsonl`, just doesn't print).
-- **`cloudSync({ apiKey, apiBaseUrl, flushIntervalMs, maxBufferSize })`** — optional, additive. Buffers each call's real record and pushes it to [Maskea Cloud](https://maskea.services/maskea/cloud) on an interval, batched and non-blocking; sync failures never surface to your actual AI call. Never required — everything above works with zero network calls to a Maskea server.
+- **`cloudSync({ apiKey, apiBaseUrl, flushIntervalMs, maxBufferSize })`** — optional, additive. Buffers each call's real record and pushes it to [Maskea Cloud](https://nopea.tech/maskea/cloud) on an interval, batched and non-blocking; sync failures never surface to your actual AI call. Never required — everything above works with zero network calls to a Maskea server.
 
 ## Maskea Cloud (optional)
 
 ```bash
-npx maskea cloud login   # opens maskea.services/maskea/cloud to sign in + create a project
+npx maskea cloud login   # opens nopea.tech/maskea/cloud to sign in + create a project
 npx maskea cloud link    # paste the project's API key, saved to .maskea/cloud.json
 ```
 

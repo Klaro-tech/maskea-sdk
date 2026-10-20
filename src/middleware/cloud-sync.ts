@@ -38,7 +38,7 @@ interface CloudLinkConfig {
   projectKey?: string
 }
 
-const DEFAULT_API_BASE_URL = "https://maskea.services"
+const DEFAULT_API_BASE_URL = "https://nopea.tech"
 
 export function cloudSync(options: CloudSyncOptions = {}): Middleware {
   const apiBaseUrl = (options.apiBaseUrl ?? DEFAULT_API_BASE_URL).replace(/\/+$/, "")

@@ -19,7 +19,7 @@ export type TelemetryEvent =
   | "cloud_login"
   | "cloud_project_connected"
 
-const DEFAULT_ENDPOINT = "https://maskea.services/api/maskea/telemetry"
+const DEFAULT_ENDPOINT = "https://nopea.tech/api/maskea/telemetry"
 
 /**
  * Anonymous operational metadata only -- installationId/projectId (random
@@ -35,7 +35,7 @@ const DEFAULT_ENDPOINT = "https://maskea.services/api/maskea/telemetry"
  * at a 2s timeout so a hung connection can't hang the process either.
  */
 function post(installationId: string, projectId: string, eventName: TelemetryEvent, extra?: { cliCommand?: string; middleware?: string[] }): void {
-  const endpoint = process.env.KLARO_TELEMETRY_ENDPOINT ?? DEFAULT_ENDPOINT
+  const endpoint = process.env.MASKEA_TELEMETRY_ENDPOINT ?? DEFAULT_ENDPOINT
   const payload = {
     installationId,
     projectId,

@@ -3,13 +3,13 @@ import { rmSync, existsSync } from "node:fs"
 import { appendJsonLine, writeJson } from "../storage/local-store.js"
 import { loadDashboardData } from "./data.js"
 
-const KLARO_DIR = new URL("../../.maskea", import.meta.url).pathname
+const MASKEA_DIR = new URL("../../.maskea", import.meta.url).pathname
 
 beforeEach(() => {
-  if (existsSync(KLARO_DIR)) rmSync(KLARO_DIR, { recursive: true, force: true })
+  if (existsSync(MASKEA_DIR)) rmSync(MASKEA_DIR, { recursive: true, force: true })
 })
 afterEach(() => {
-  if (existsSync(KLARO_DIR)) rmSync(KLARO_DIR, { recursive: true, force: true })
+  if (existsSync(MASKEA_DIR)) rmSync(MASKEA_DIR, { recursive: true, force: true })
 })
 
 describe("loadDashboardData", () => {

@@ -6,10 +6,10 @@ import { join } from "node:path"
 // is installed. This is the entire "local logging + cost estimation"
 // storage layer; Maskea Cloud (a separate, optional service) can later sync
 // this directory's contents up, but nothing here requires that to exist.
-const KLARO_DIR = ".maskea"
+const MASKEA_DIR = ".maskea"
 
 function ensureDir(): string {
-  const dir = join(process.cwd(), KLARO_DIR)
+  const dir = join(process.cwd(), MASKEA_DIR)
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true })
   return dir
 }
@@ -22,7 +22,7 @@ export function appendJsonLine(file: string, record: unknown): void {
 
 /** Reads every JSON line back -- used by `maskea stats`/`maskea inspect` and by budget()'s running-total calculation. Corrupt/partial trailing lines (e.g. a process killed mid-write) are skipped rather than failing the whole read. Never creates .maskea/ as a side effect -- a read that finds nothing should report nothing exists yet, not silently create the directory (doctor's ".maskea/ local storage" check depends on this). */
 export function readJsonLines<T = unknown>(file: string): T[] {
-  const dir = join(process.cwd(), KLARO_DIR)
+  const dir = join(process.cwd(), MASKEA_DIR)
   const path = join(dir, `${file}.jsonl`)
   if (!existsSync(path)) return []
   const raw = readFileSync(path, "utf8")
@@ -40,7 +40,7 @@ export function readJsonLines<T = unknown>(file: string): T[] {
 
 /** Small key-value store for things that aren't append-only logs (e.g. the resolved config from `maskea init`). */
 export function readJson<T>(file: string, fallback: T): T {
-  const dir = join(process.cwd(), KLARO_DIR)
+  const dir = join(process.cwd(), MASKEA_DIR)
   const path = join(dir, `${file}.json`)
   if (!existsSync(path)) return fallback
   try {

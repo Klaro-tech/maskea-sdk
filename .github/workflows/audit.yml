@@ -1,6 +1,6 @@
 name: Dependency Audit
 
-# KlaroShield vuln-mgmt phase 2 (hardening our own supply chain): this SDK
+# Maskea vuln-mgmt phase 2 (hardening our own supply chain): this SDK
 # ships as a dependency in other people's PII/secrets-handling pipelines --
 # a known-vulnerable transitive dependency here is a real risk to every
 # customer install, not just this repo. Weekly + on-demand, separate from

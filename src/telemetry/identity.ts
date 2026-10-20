@@ -58,9 +58,9 @@ export function writeTelemetryConfig(config: TelemetryConfig): void {
   writeJson("config", config)
 }
 
-/** KLARO_TELEMETRY=0 always wins over .maskea/config.json, per the brief's "environment variable should override configuration." */
+/** MASKEA_TELEMETRY=0 always wins over .maskea/config.json, per the brief's "environment variable should override configuration." */
 export function isTelemetryEnabled(): boolean {
-  if (process.env.KLARO_TELEMETRY === "0") return false
-  if (process.env.KLARO_TELEMETRY === "1") return true
+  if (process.env.MASKEA_TELEMETRY === "0") return false
+  if (process.env.MASKEA_TELEMETRY === "1") return true
   return readTelemetryConfig().telemetry
 }

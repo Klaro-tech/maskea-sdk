@@ -4,13 +4,13 @@ import { join } from "node:path"
 import { appendJsonLine, writeJson } from "./storage/local-store.js"
 import { generateReport, renderMarkdown, renderJson, renderHtml } from "./report.js"
 
-const KLARO_DIR = join(process.cwd(), ".maskea")
+const MASKEA_DIR = join(process.cwd(), ".maskea")
 
 beforeEach(() => {
-  rmSync(KLARO_DIR, { recursive: true, force: true })
+  rmSync(MASKEA_DIR, { recursive: true, force: true })
 })
 afterEach(() => {
-  rmSync(KLARO_DIR, { recursive: true, force: true })
+  rmSync(MASKEA_DIR, { recursive: true, force: true })
 })
 
 function seed() {
