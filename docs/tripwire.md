@@ -25,6 +25,15 @@ Add `cloud: {}` to `createTripwire` (after `maskea cloud link`, or pass `cloud: 
 **Tripwire** on your project page at nopea.tech, and the workspace owner gets one email per credential per hour. Available on
 the Maskea Team, Startup and Enterprise plans.
 
+## Test your alarm (drill)
+```ts
+const result = await tripwire.drill();
+// { drillId, channels: { callback: true, webhook: true, cloud: true }, allDelivered: true }
+```
+Sends clearly labelled DRILL alerts (a volume alert, and a honey alert if honey is set up) through every channel you configured and
+tells you which delivered. `null` means that channel is not configured; `false` means it failed. Drill alerts show as DRILL in
+the dashboard, never email the owner, and do not count as incidents. Run it weekly and after changing Slack or email settings.
+
 ## Honey records
 ```ts
 const fakeCustomers = honey.generate(5);  // insert these into your customers table once

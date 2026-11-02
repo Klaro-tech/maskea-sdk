@@ -98,3 +98,31 @@ describe("cloud dashboard delivery", () => {
     expect(() => bad.record("x", 1000)).not.toThrow();
   });
 });
+
+describe("detection drill", () => {
+  const honey = createHoney({ secret: "a-long-secret-value-123", emailDomain: "tripwire.acme.com" });
+  it("sends labelled DRILL alerts through every channel and reports which delivered", async () => {
+    const alerts: TripwireAlert[] = [];
+    const posts: any[] = [];
+    const tw = createTripwire({ budget, honey, onAlert: (a) => { alerts.push(a); }, webhookUrl: "https://hooks.slack.com/x", cloud: { apiKey: "k" },
+      fetch: (async (u: string, i: any) => { posts.push([u, JSON.parse(i.body)]); return new Response("{}", { status: 200 }); }) as any });
+    const r = await tw.drill("abc");
+    expect(r).toMatchObject({ drillId: "abc", allDelivered: true, channels: { callback: true, webhook: true, cloud: true } });
+    expect(alerts.map((a) => [a.type, a.drill])).toEqual([["volume", true], ["honey", true]]);
+    expect(posts.find((p) => p[0].includes("hooks.slack"))![1].text).toContain("DRILL");
+    expect(alerts[0].credentialId).toBe("drill:abc");
+  });
+  it("fails the drill when a configured channel does not deliver, and ignores the cooldown", async () => {
+    const tw = createTripwire({ budget, webhookUrl: "https://hooks.slack.com/x", fetch: (async () => new Response("no", { status: 500 })) as any });
+    const first = await tw.drill("1");
+    const second = await tw.drill("2");
+    expect(first.allDelivered).toBe(false);
+    expect(first.channels.webhook).toBe(false);
+    expect(second.channels.webhook).toBe(false); // sent again despite cooldown
+  });
+  it("with no channel configured, nothing was tested", async () => {
+    const r = await createTripwire({ budget }).drill();
+    expect(r.allDelivered).toBe(false);
+    expect(r.channels).toEqual({ callback: null, webhook: null, cloud: null });
+  });
+});

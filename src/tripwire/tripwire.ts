@@ -27,6 +27,8 @@ export interface TripwireAlert {
   mode: TripwireMode;
   at: string;
   message: string;
+  /** True for alerts produced by drill(): practice alerts, never real incidents. */
+  drill?: boolean;
 }
 
 export interface TripwireOptions {
@@ -63,6 +65,9 @@ export interface Decision {
   delayMs?: number;
 }
 
+export interface ChannelResult { callback: boolean | null; webhook: boolean | null; cloud: boolean | null }
+export interface DrillResult { drillId: string; channels: ChannelResult; allDelivered: boolean }
+
 export class TripwireBlockedError extends Error {
   constructor(public readonly credentialId: string, public readonly decision: Decision) {
     super(`Tripwire: credential "${credentialId}" went over its data budget`);
@@ -88,30 +93,38 @@ export function createTripwire(options: TripwireOptions) {
     for (const [k, at] of lastAlert) if (t - at > cooldownMs * 2) lastAlert.delete(k);
   }
 
-  async function deliver(alert: TripwireAlert): Promise<void> {
-    try { await options.onAlert?.(alert); } catch { /* an alert handler must never break the app */ }
+  /** Sends one alert to every configured channel. Each result is true (delivered), false (failed) or null (not configured). */
+  async function deliver(alert: TripwireAlert): Promise<ChannelResult> {
+    const out: ChannelResult = { callback: null, webhook: null, cloud: null };
+    if (options.onAlert) {
+      try { await options.onAlert(alert); out.callback = true; } catch { out.callback = false; /* an alert handler must never break the app */ }
+    }
     if (options.cloud) {
       try {
         const key = options.cloud.apiKey ?? readJson<{ projectKey?: string }>("cloud", {}).projectKey;
         if (key) {
-          await doFetch(`${(options.cloud.apiBaseUrl ?? "https://nopea.tech").replace(/\/+$/, "")}/api/maskea/cloud/tripwire`, {
+          const res = await doFetch(`${(options.cloud.apiBaseUrl ?? "https://nopea.tech").replace(/\/+$/, "")}/api/maskea/cloud/tripwire`, {
             method: "POST",
             headers: { "content-type": "application/json", "x-api-key": key },
             body: JSON.stringify({ alert }),
             signal: AbortSignal.timeout(5000),
           });
-        }
-      } catch { /* dashboard delivery is best effort, like the other channels */ }
+          out.cloud = res.ok;
+        } else out.cloud = false;
+      } catch { out.cloud = false; /* dashboard delivery is best effort */ }
     }
-    if (!options.webhookUrl) return;
-    try {
-      await doFetch(options.webhookUrl, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ text: `Tripwire: ${alert.message}`, alert }),
-        signal: AbortSignal.timeout(5000),
-      });
-    } catch { /* delivery failure is not the app's problem; the onAlert callback still ran */ }
+    if (options.webhookUrl) {
+      try {
+        const res = await doFetch(options.webhookUrl, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ text: `Tripwire${alert.drill ? " DRILL" : ""}: ${alert.message}`, alert }),
+          signal: AbortSignal.timeout(5000),
+        });
+        out.webhook = res.ok;
+      } catch { out.webhook = false; }
+    }
+    return out;
   }
 
   function maybeAlert(alert: TripwireAlert): void {
@@ -166,7 +179,31 @@ export function createTripwire(options: TripwireOptions) {
     return result;
   }
 
-  return { record, inspect, wrap, mode };
+  /**
+   * Practice run: sends a clearly labelled DRILL alert (and a honey one if honey is configured) through every channel and
+   * reports which channels delivered. Ignores the cooldown. Use it weekly: an alarm nobody has tested is not a control.
+   */
+  async function drill(drillId: string = Math.random().toString(36).slice(2, 10)): Promise<DrillResult> {
+    const credentialId = `drill:${drillId}`;
+    const budget = options.budget;
+    const at = new Date(now()).toISOString();
+    const volume: TripwireAlert = { type: "volume", credentialId, resource: "drill", used: budget.rows + 1, budget, mode, at, drill: true,
+      message: `DRILL: practice alert for "${credentialId}" (simulated read over the ${budget.rows}-row budget). No real data was read` };
+    const results = [await deliver(volume)];
+    if (options.honey) {
+      results.push(await deliver({ type: "honey", credentialId, resource: "drill", used: null, budget: null, mode, at, drill: true,
+        message: `DRILL: practice honey-record alert for "${credentialId}". No real data was read` }));
+    }
+    const merge = (k: keyof ChannelResult): boolean | null => {
+      const vals = results.map((r) => r[k]).filter((v) => v !== null) as boolean[];
+      return vals.length ? vals.every(Boolean) : null;
+    };
+    const channels: ChannelResult = { callback: merge("callback"), webhook: merge("webhook"), cloud: merge("cloud") };
+    const configured = Object.values(channels).filter((v) => v !== null) as boolean[];
+    return { drillId, channels, allDelivered: configured.length > 0 && configured.every(Boolean) };
+  }
+
+  return { record, inspect, wrap, drill, mode };
 }
 
 export type Tripwire = ReturnType<typeof createTripwire>;

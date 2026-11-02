@@ -26,4 +26,4 @@ export {
   type TelemetryConfig,
 } from "./telemetry/identity.js"
 
-export { createTripwire, createHoney, TripwireBlockedError, type Tripwire, type TripwireOptions, type TripwireAlert, type TripwireMode, type Budget, type Decision, type Honey, type HoneyOptions, type HoneyRecord } from "./tripwire/index.js"
+export { createTripwire, createHoney, TripwireBlockedError, type Tripwire, type TripwireOptions, type TripwireAlert, type TripwireMode, type Budget, type Decision, type DrillResult, type ChannelResult, type Honey, type HoneyOptions, type HoneyRecord } from "./tripwire/index.js"
