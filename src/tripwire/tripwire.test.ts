@@ -84,3 +84,17 @@ describe("honey records", () => {
     expect(() => createHoney({ secret: "short", emailDomain: "x.com" })).toThrow();
   });
 });
+
+describe("cloud dashboard delivery", () => {
+  it("posts the alert to the Nopea endpoint with the project key and still works if it fails", async () => {
+    const calls: any[] = [];
+    const tw = createTripwire({ budget, cloud: { apiKey: "maskea_proj_abc" }, fetch: (async (u: string, i: any) => { calls.push([u, i]); return new Response("{}"); }) as any });
+    tw.record("key_1", 1000);
+    await new Promise((r) => setTimeout(r, 0));
+    expect(calls[0][0]).toBe("https://nopea.tech/api/maskea/cloud/tripwire");
+    expect(calls[0][1].headers["x-api-key"]).toBe("maskea_proj_abc");
+    expect(JSON.parse(calls[0][1].body).alert.credentialId).toBe("key_1");
+    const bad = createTripwire({ budget, cloud: { apiKey: "k" }, fetch: (async () => { throw new Error("down"); }) as any });
+    expect(() => bad.record("x", 1000)).not.toThrow();
+  });
+});

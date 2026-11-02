@@ -20,6 +20,11 @@ const tripwire = createTripwire({
 const customers = await tripwire.wrap(apiKey.id, () => db.customers.findMany({ take: 1000 }), { resource: "GET /customers" });
 ```
 
+## See alerts in your dashboard
+Add `cloud: {}` to `createTripwire` (after `maskea cloud link`, or pass `cloud: { apiKey }`). Each alert then appears under
+**Tripwire** on your project page at nopea.tech, and the workspace owner gets one email per credential per hour. Available on
+the Maskea Team, Startup and Enterprise plans.
+
 ## Honey records
 ```ts
 const fakeCustomers = honey.generate(5);  // insert these into your customers table once

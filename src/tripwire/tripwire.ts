@@ -1,4 +1,5 @@
 import type { Honey } from "./honey.js";
+import { readJson } from "../storage/local-store.js";
 
 /**
  * Tripwire: limit and watch how much data one credential (API key, OAuth token, user) reads, and say so out loud when
@@ -40,6 +41,11 @@ export interface TripwireOptions {
   webhookUrl?: string;
   /** Minimum time between two alerts of the same type for the same credential. Default 15 minutes. */
   cooldownMs?: number;
+  /**
+   * Also send every alert to your Nopea Maskea Cloud dashboard (Team plan and above). With `{}` it uses the project key
+   * saved by `maskea cloud link`; pass `apiKey` to use your own (for example from a CI secret).
+   */
+  cloud?: { apiKey?: string; apiBaseUrl?: string };
   /** Optional honey records detector, see createHoney(). */
   honey?: Honey;
   /** How long "slow" mode asks the caller to wait per call. Default 2000 ms. */
@@ -84,6 +90,19 @@ export function createTripwire(options: TripwireOptions) {
 
   async function deliver(alert: TripwireAlert): Promise<void> {
     try { await options.onAlert?.(alert); } catch { /* an alert handler must never break the app */ }
+    if (options.cloud) {
+      try {
+        const key = options.cloud.apiKey ?? readJson<{ projectKey?: string }>("cloud", {}).projectKey;
+        if (key) {
+          await doFetch(`${(options.cloud.apiBaseUrl ?? "https://nopea.tech").replace(/\/+$/, "")}/api/maskea/cloud/tripwire`, {
+            method: "POST",
+            headers: { "content-type": "application/json", "x-api-key": key },
+            body: JSON.stringify({ alert }),
+            signal: AbortSignal.timeout(5000),
+          });
+        }
+      } catch { /* dashboard delivery is best effort, like the other channels */ }
+    }
     if (!options.webhookUrl) return;
     try {
       await doFetch(options.webhookUrl, {
