@@ -31,7 +31,7 @@ const PII_RULES: Record<PiiType, RedactionRule> = {
   },
   // India. Aadhaar: 12 digits, first digit 2-9, written in groups of four (spaces or hyphens). Contiguous 12-digit numbers are not
   // matched (too many order and phone numbers); the Verhoeff check digit is not verified.
-  aadhaar: { name: "aadhaar", pattern: /\b[2-9]\d{3}[-\s]\d{4}[-\s]\d{4}\b/g, replacement: "[REDACTED_AADHAAR]" },
+  aadhaar: { name: "aadhaar", pattern: /(?<![\d-])[2-9]\d{3}[-\s]\d{4}[-\s]\d{4}(?![-\s]?\d)/g, replacement: "[REDACTED_AADHAAR]" },
   // PAN: five letters, four digits, one letter (e.g. ABCDE1234F); the fourth letter encodes the holder type.
   pan: { name: "pan", pattern: /\b[A-Z]{3}[ABCFGHLJPT][A-Z]\d{4}[A-Z]\b/g, replacement: "[REDACTED_PAN]" },
 }
