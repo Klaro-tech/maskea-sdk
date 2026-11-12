@@ -31,4 +31,17 @@ describe("pii middleware", () => {
     const wrapped = maskea.wrap(async () => ({ text: "ssn 123-45-6789" }))
     await expect(wrapped()).rejects.toThrow(/PII detected in the provider's response/)
   })
+
+  it("India identifiers are off by default and redacted when asked for", async () => {
+    const text = "Aadhaar 2345 6789 0123, PAN ABCPE1234F"
+    const off = new Maskea().use(pii({ mode: "mask" }))
+    const r1 = await off.wrap(async (a: { text: string }) => ({ echo: a.text }))({ text })
+    expect(r1.echo).toContain("2345 6789 0123")
+    const on = new Maskea().use(pii({ mode: "mask", types: ["aadhaar", "pan"] }))
+    const r2 = await on.wrap(async (a: { text: string }) => ({ echo: a.text }))({ text })
+    expect(r2.echo).not.toContain("2345 6789 0123")
+    expect(r2.echo).not.toContain("ABCPE1234F")
+    expect(r2.echo).toContain("[REDACTED_AADHAAR]")
+    expect(r2.echo).toContain("[REDACTED_PAN]")
+  })
 })
