@@ -70,4 +70,13 @@ describe("pii middleware", () => {
     const r2 = await off.wrap(async (a: { text: string }) => ({ echo: a.text }))({ text })
     expect(r2.echo).toContain("HDFC0001234")
   })
+
+  it("credit cards need a valid Luhn check digit and the American Express 4-6-5 layout is covered", async () => {
+    const m = new Maskea().use(pii({ mode: "mask" }))
+    const run = (text: string) => m.wrap(async (a: { text: string }) => ({ echo: a.text }))({ text })
+    const valid = await run("visa 4111 1111 1111 1111 amex 3782 822463 10005")
+    expect(valid.echo).toBe("visa [REDACTED_CARD] amex [REDACTED_CARD]")
+    const look = await run("tracking 4111 1111 1111 1112")
+    expect(look.echo).toContain("4111 1111 1111 1112")
+  })
 })

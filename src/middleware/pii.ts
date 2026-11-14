@@ -30,6 +30,18 @@ export function verhoeffValid(digits: string): boolean {
   return c === 0
 }
 
+export function luhnValid(digits: string): boolean {
+  let sum = 0
+  let alt = false
+  for (let i = digits.length - 1; i >= 0; i--) {
+    let n = Number(digits[i])
+    if (alt) { n *= 2; if (n > 9) n -= 9 }
+    sum += n
+    alt = !alt
+  }
+  return digits.length >= 13 && sum % 10 === 0
+}
+
 // GSTIN check character: mod-36 over the first 14 characters (weights 1,2,1,2,...).
 const GSTIN_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 export function gstinValid(gstin: string): boolean {
@@ -55,8 +67,10 @@ const PII_RULES: Record<PiiType, RedactionRule> = {
   // false-positives against order IDs, tracking numbers, etc.
   credit_card: {
     name: "credit_card",
-    pattern: /\b(?:4\d{3}|5[1-5]\d{2}|3[47]\d{2}|6011)[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{1,4}\b/g,
+    pattern: /\b(?:(?:4\d{3}|5[1-5]\d{2}|3[47]\d{2}|6011)[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{1,4}|3[47]\d{2}[-\s]?\d{6}[-\s]?\d{5})\b/g,
     replacement: "[REDACTED_CARD]",
+    // Luhn check: a 16-digit number that fails it (an order or tracking number) is not a card.
+    validate: (m) => luhnValid(m.replace(/\D/g, "")),
   },
   // India. Aadhaar: 12 digits, first digit 2-9, written in groups of four (spaces or hyphens). Contiguous 12-digit numbers are not
   // matched (too many order and phone numbers); the Verhoeff check digit is verified, so a group of four-four-four digits that is not a valid Aadhaar is left alone.
@@ -80,6 +94,23 @@ const PII_RULES: Record<PiiType, RedactionRule> = {
   },
   // Indian mobile numbers: optional +91 / 91 / 0, then ten digits starting 6-9, with an optional single space or hyphen after five digits.
   in_phone: { name: "in_phone", pattern: /(?<![\d-])(?:\+91[-\s]?|91[-\s]?|0)?[6-9]\d{4}[-\s]?\d{5}(?![-\s]?\d)/g, replacement: "[REDACTED_PHONE_IN]" },
+}
+
+/**
+ * Finds PII in a string without changing it: the type and character range of every match, after checksum validation.
+ * Used by the accuracy benchmark (benchmarks/pii-accuracy) and handy for audits. Defaults to the same types as pii().
+ */
+export function detectPii(text: string, types?: PiiType[]): Array<{ type: PiiType; start: number; end: number }> {
+  const chosen = types ?? (Object.keys(PII_RULES) as PiiType[]).filter((t) => !OPT_IN.includes(t))
+  const found: Array<{ type: PiiType; start: number; end: number }> = []
+  for (const type of chosen) {
+    const rule = PII_RULES[type]
+    for (const m of text.matchAll(new RegExp(rule.pattern.source, rule.pattern.flags))) {
+      if (rule.validate && !rule.validate(m[0])) continue
+      found.push({ type, start: m.index!, end: m.index! + m[0].length })
+    }
+  }
+  return found.sort((a, b) => a.start - b.start)
 }
 
 export function pii(options: PiiOptions = {}): Middleware {
