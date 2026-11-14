@@ -1,6 +1,6 @@
 {
   "name": "@nopeatech/maskea",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "The AI Runtime every AI application installs on Day 1 -- retries, budget control, secret/PII redaction, structured output validation, and local logging for LLM calls. Zero required cloud account.",
   "license": "MIT",
   "type": "module",
