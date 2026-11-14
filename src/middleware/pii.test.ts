@@ -94,4 +94,30 @@ describe("pii middleware", () => {
     const off = await new Maskea().use(pii({ mode: "mask" })).wrap(async (a: { text: string }) => ({ echo: a.text }))({ text: "Priya Sharma, 221 Baker Street" })
     expect(off.echo).toBe("Priya Sharma, 221 Baker Street")
   })
+
+  it("custom detectors can mask spans the built-in rules do not know, in requests and responses", async () => {
+    const find = (word: string) => (text: string) => {
+      const i = text.indexOf(word)
+      return i < 0 ? [] : [{ start: i, end: i + word.length, label: "person" }]
+    }
+    const m = new Maskea().use(pii({ mode: "mask", detectors: [find("Ojas Pandit")] }))
+    const seen: string[] = []
+    const out = await m.wrap(async (a: { text: string }) => { seen.push(a.text); return { echo: "reply about Ojas Pandit" } })({ text: "Hello Ojas Pandit, mail a@b.co" })
+    expect(seen[0]).toBe("Hello [REDACTED_PERSON], mail [REDACTED_EMAIL]")
+    expect(out.echo).toBe("reply about [REDACTED_PERSON]")
+  })
+
+  it("a failing custom detector stops the call by default, or is skipped when asked", async () => {
+    const boom = () => { throw new Error("model offline") }
+    const strict = new Maskea().use(pii({ detectors: [boom] }))
+    await expect(strict.wrap(async (a: { text: string }) => a)({ text: "hi" })).rejects.toThrow(/custom PII detector failed/)
+    const lenient = new Maskea().use(pii({ detectors: [boom], onDetectorError: "skip" }))
+    expect((await lenient.wrap(async (a: { text: string }) => a)({ text: "hi" })).text).toBe("hi")
+  })
+
+  it("overlapping custom spans are merged and out-of-range spans are ignored", async () => {
+    const d = (t: string) => (t.startsWith("abc") ? [{ start: 0, end: 5 }, { start: 3, end: 8 }, { start: 50, end: 60 }, { start: -1, end: 2 }] : [])
+    const out = await new Maskea().use(pii({ detectors: [d] })).wrap(async (a: { text: string }) => a)({ text: "abcdefghij" })
+    expect(out.text).toBe("[REDACTED_CUSTOM]fghij")
+  })
 })

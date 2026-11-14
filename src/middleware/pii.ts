@@ -9,8 +9,25 @@ export type PiiType = "email" | "phone" | "ssn" | "credit_card" | "aadhaar" | "p
 // silently for everyone would change what existing users see.
 const OPT_IN: PiiType[] = ["aadhaar", "pan", "gstin", "ifsc", "upi", "in_phone", "name", "address"]
 
+/** A span a custom detector found in a string. `label` names it in the replacement and in the hit summary (default "CUSTOM"). */
+export interface DetectedSpan {
+  start: number
+  end: number
+  label?: string
+}
+
+/**
+ * Plug in your own detector, such as a trained name model, a Presidio service or an in-house classifier. It gets each string after the built-in rules
+ * have run and returns the spans to mask. May be async.
+ */
+export type PiiDetector = (text: string) => DetectedSpan[] | Promise<DetectedSpan[]>
+
 export interface PiiOptions {
   mode?: "mask" | "block"
+  /** Extra detectors run on every string after the built-in rules. Matched spans are masked as [REDACTED_<LABEL>]. */
+  detectors?: PiiDetector[]
+  /** What to do when a detector throws or rejects. "throw" (default) fails the call, so nothing unchecked is sent; "skip" carries on without it. */
+  onDetectorError?: "throw" | "skip"
   /** Which PII types to scan for. Default: email, phone, ssn, credit_card. Add the India types "aadhaar", "pan", "gstin", "ifsc", "upi", "in_phone", and the rule-based "name" and "address" by name. */
   types?: PiiType[]
 }
@@ -162,14 +179,70 @@ export function detectPii(text: string, types?: PiiType[]): Array<{ type: PiiTyp
   return found.sort((a, b) => a.start - b.start)
 }
 
+/** Applies custom detectors to every string in a JSON-like value; returns a new value and a per-label count (never the matched text). */
+async function applyDetectors<T>(
+  value: T,
+  detectors: PiiDetector[],
+  onError: "throw" | "skip"
+): Promise<{ value: T; hits: Array<{ rule: string; count: number }> }> {
+  const counts = new Map<string, number>()
+  async function maskString(text: string): Promise<string> {
+    let spans: Array<Required<DetectedSpan>> = []
+    for (const detect of detectors) {
+      try {
+        for (const sp of await detect(text)) {
+          if (Number.isInteger(sp.start) && Number.isInteger(sp.end) && sp.start >= 0 && sp.end > sp.start && sp.end <= text.length) {
+            spans.push({ start: sp.start, end: sp.end, label: (sp.label ?? "CUSTOM").toUpperCase().replace(/[^A-Z0-9_]/g, "_") })
+          }
+        }
+      } catch (err) {
+        if (onError === "throw") throw new Error(`[maskea] A custom PII detector failed, so the call was stopped: ${(err as Error).message}`)
+      }
+    }
+    if (spans.length === 0) return text
+    spans.sort((a, b) => a.start - b.start || b.end - a.end)
+    const kept: typeof spans = []
+    for (const sp of spans) if (!kept.length || sp.start >= kept[kept.length - 1]!.end) kept.push(sp)
+    let out = ""
+    let at = 0
+    for (const sp of kept) {
+      out += text.slice(at, sp.start) + `[REDACTED_${sp.label}]`
+      at = sp.end
+      counts.set(`custom:${sp.label.toLowerCase()}`, (counts.get(`custom:${sp.label.toLowerCase()}`) ?? 0) + 1)
+    }
+    return out + text.slice(at)
+  }
+  async function walk(v: unknown): Promise<unknown> {
+    if (typeof v === "string") return maskString(v)
+    if (Array.isArray(v)) return Promise.all(v.map(walk))
+    if (v !== null && typeof v === "object") {
+      const out: Record<string, unknown> = {}
+      for (const [k, val] of Object.entries(v)) out[k] = await walk(val)
+      return out
+    }
+    return v
+  }
+  const redacted = (await walk(value)) as T
+  return { value: redacted, hits: Array.from(counts.entries()).map(([rule, count]) => ({ rule, count })) }
+}
+
 export function pii(options: PiiOptions = {}): Middleware {
   sendTelemetry("middleware_pii_enabled")
   const mode = options.mode ?? "mask"
   const types = options.types ?? defaultTypes()
   const rules = types.flatMap(rulesFor)
+  const detectors = options.detectors ?? []
+  const onDetectorError = options.onDetectorError ?? "throw"
 
   return async (args, next, ctx) => {
-    const { value, hits } = deepRedact(args, rules)
+    const first = deepRedact(args, rules)
+    let value = first.value
+    let hits = first.hits
+    if (detectors.length) {
+      const extra = await applyDetectors(value, detectors, onDetectorError)
+      value = extra.value
+      hits = [...hits, ...extra.hits]
+    }
     if (hits.length > 0) {
       ctx.meta.piiHits = hits
       if (mode === "block") {
@@ -187,7 +260,14 @@ export function pii(options: PiiOptions = {}): Middleware {
     // picked up elsewhere. Scanning only the outbound request left this
     // half of the round trip completely unprotected, which is exactly
     // what a "PII redaction" middleware exists to prevent.
-    const { value: redactedResult, hits: responseHits } = deepRedact(result, rules)
+    const firstResponse = deepRedact(result, rules)
+    let redactedResult = firstResponse.value
+    let responseHits = firstResponse.hits
+    if (detectors.length) {
+      const extra = await applyDetectors(redactedResult, detectors, onDetectorError)
+      redactedResult = extra.value
+      responseHits = [...responseHits, ...extra.hits]
+    }
     if (responseHits.length > 0) {
       ctx.meta.piiHitsResponse = responseHits
       if (mode === "block") {

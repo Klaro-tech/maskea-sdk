@@ -101,7 +101,20 @@ or set `MASKEA_TELEMETRY=0` in your environment, which always overrides
 - **`retries({ max, backoff, baseDelayMs, maxDelayMs, isRetryable })`** — exponential backoff with full jitter, retries only genuinely transient errors (429/5xx/network) by default.
 - **`budget({ maxMonthlyUsd, onExceeded })`** — estimates cost from the provider's own `usage` field (OpenAI/Anthropic shapes both supported) against a small built-in pricing table, persists spend to `.maskea/budget.jsonl`.
 - **`secrets({ mode })`** — deep-scans call args for OpenAI/Anthropic/AWS/GitHub keys and JWTs, masks or blocks.
-- **`pii({ mode, types })`** — deep-scans for email/phone/SSN/credit card, masks or blocks.
+- **`pii({ mode, types, detectors })`** — deep-scans for email/phone/SSN/credit card, masks or blocks. India types (`aadhaar`, `pan`, `gstin`, `ifsc`, `upi`, `in_phone`) and the rule-based `name` and `address` types are opt-in by name.
+  `name` finds names after a title or label and common first names; it does **not** find unfamiliar names in plain text. For that, plug in a trained detector:
+
+  ```ts
+  // Microsoft Presidio running as a service (docker run -p 5002:3000 mcr.microsoft.com/presidio-analyzer)
+  const presidio = async (text: string) => {
+    const r = await fetch("http://localhost:5002/analyze", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, language: "en" }) })
+    const found: Array<{ start: number; end: number; entity_type: string }> = await r.json()
+    return found.map((f) => ({ start: f.start, end: f.end, label: f.entity_type }))
+  }
+  maskea.use(pii({ mode: "mask", types: ["email", "aadhaar", "pan"], detectors: [presidio] }))
+  ```
+
+  A detector gets each string and returns `{ start, end, label }` spans (sync or async). If a detector throws, the call is stopped by default, so nothing unchecked is sent; pass `onDetectorError: "skip"` to carry on without it.
 - **`validation({ schema, extractText, maxRetries })`** — re-runs the call if the response doesn't parse as JSON or fails a Zod-compatible schema's `safeParse`.
 - **`logging({ format })`** — `"pretty"` (colored stdout), `"json"`, or `"silent"` (still persists to `.maskea/logs.jsonl`, just doesn't print).
 - **`cloudSync({ apiKey, apiBaseUrl, flushIntervalMs, maxBufferSize })`** — optional, additive. Buffers each call's real record and pushes it to [Maskea Cloud](https://nopea.tech/maskea/cloud) on an interval, batched and non-blocking; sync failures never surface to your actual AI call. Never required — everything above works with zero network calls to a Maskea server.
