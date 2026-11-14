@@ -28,8 +28,8 @@ A prediction counts as correct when it has the right type and overlaps the label
 | GSTIN | 100 / 100 / 100 | not on | 100 / 24.4 / 39.3 |
 | UPI ID | 100 / 100 / 100 | not on | not supported |
 | IFSC | 100 / 100 / 100 | not on | not supported |
-| Person name | **not supported** | not supported | 57.1 / 100 / 72.7 |
-| Location / address | **not supported** | not supported | 89.7 / 86.7 / 88.1 |
+| Person name (first run, before the update above) | not supported | not supported | 57.1 / 100 / 72.7 |
+| Location / address (first run) | not supported | not supported | 89.7 / 86.7 / 88.1 |
 
 | Overall | Precision | Recall | False positives | Missed | Look-alike documents wrongly flagged |
 |---|---|---|---|---|---|
@@ -38,11 +38,27 @@ A prediction counts as correct when it has the right type and overlaps the label
 | Presidio | 83.1% | 69.7% | 117 | 250 | 39 of 220 |
 | Presidio + India | 79.2% | 81.9% | 177 | 149 | 69 of 220 |
 
+## Update 2026-11-14: name and address detection added
+Maskea now has opt-in `name` and `address` types (`pii({ types: ["name", "address"] })`). They are **rule-based**: a word list of common first names and
+surnames, plus cues (a title such as "Dr.", or a label such as "Name:" or "Patient:"), and a street-address pattern. They are not a trained model.
+
+| Person names | Precision | Recall |
+|---|---|---|
+| Maskea, names in its word list (main set) | 100% | 100% |
+| **Maskea, names it has never seen, no cue (held-out set)** | n/a (nothing found) | **0%** |
+| Presidio, main set | 57% | 100% |
+| Presidio, held-out names | 50% | 75% |
+
+The main-set result is circular: the test names are in Maskea's word list. The held-out run is the honest one. **Maskea finds a name only when the name is in its list
+or follows a title or label; an unfamiliar name in running text is missed. Presidio finds most of them, at a cost of many false alarms.** Street addresses score
+100/100 here, but the test addresses follow the patterns the detector was written for, so expect less on real text. Bare city names ("Mumbai") are not matched on
+purpose. To reproduce the held-out run: `python3 generate.py --unseen > dataset-unseen.json`, then run the same steps with `SET=-unseen`.
+To close the gap properly Maskea needs a trained name model (next step) or a pluggable detector.
+
 ## What it shows
 - **Maskea is stricter.** Checksums (Luhn for cards, Verhoeff for Aadhaar, the GSTIN check character) keep look-alike numbers from being masked.
   Presidio flags more look-alikes (39 to 69 of 220 against 17) and has a lower precision.
-- **Presidio finds names and addresses; Maskea does not.** That is the real gap and the main reason Presidio's recall is higher overall. Maskea cannot
-  yet find a person's name or street address in free text. Fixing this is the biggest item on the Maskea list.
+- **Presidio finds names in running text; Maskea only finds them with a cue or from its word list** (see the update above). Closing that needs a trained model.
 - **Defaults miss a lot of Indian data**, because the India types are off unless asked for.
 - **A first run exposed two flaws in our own card detection** (no Luhn check, American Express 4-6-5 layout not matched). Both were fixed after this
   run started; the table above is after the fix (card was 75 / 80 before).

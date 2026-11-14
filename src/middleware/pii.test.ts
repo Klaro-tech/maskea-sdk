@@ -79,4 +79,19 @@ describe("pii middleware", () => {
     const look = await run("tracking 4111 1111 1111 1112")
     expect(look.echo).toContain("4111 1111 1111 1112")
   })
+
+  it("name and address are opt-in and rule-based: titles, labels, known full names, street addresses", async () => {
+    const run = async (text: string, types: Array<"name" | "address">) =>
+      (await new Maskea().use(pii({ mode: "mask", types })).wrap(async (a: { text: string }) => ({ echo: a.text }))({ text })).echo
+    expect(await run("Dr. Zubin Mehta reviewed it", ["name"])).toBe("Dr. [REDACTED_NAME] reviewed it")
+    expect(await run("Patient: Nandini Rao, ward 4", ["name"])).toBe("Patient: [REDACTED_NAME], ward 4")
+    expect(await run("Assign to Priya Sharma today", ["name"])).toBe("Assign to [REDACTED_NAME] today")
+    expect(await run("Please Mark Down the Meeting Notes from Monday", ["name"])).toBe("Please Mark Down the Meeting Notes from Monday")
+    expect(await run("Mark Smith joined", ["name"])).toBe("[REDACTED_NAME] joined") // ambiguous first name, but a known surname
+    expect(await run("Ship to 221 Baker Street, London now", ["address"])).toBe("Ship to [REDACTED_ADDRESS] now")
+    expect(await run("Flat 12 MG Road, Bengaluru. PIN 560001", ["address"])).toBe("Flat [REDACTED_ADDRESS]. PIN [REDACTED_ADDRESS]")
+    expect(await run("I live in London", ["address"])).toBe("I live in London") // a bare city is not matched
+    const off = await new Maskea().use(pii({ mode: "mask" })).wrap(async (a: { text: string }) => ({ echo: a.text }))({ text: "Priya Sharma, 221 Baker Street" })
+    expect(off.echo).toBe("Priya Sharma, 221 Baker Street")
+  })
 })

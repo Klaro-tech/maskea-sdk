@@ -4,7 +4,7 @@ Every document is a sentence or two of business-style text. `gold` lists the cha
 piece of personal data; documents with an empty `gold` are hard negatives (look-alikes that are NOT personal data).
 Run: python3 generate.py > dataset.json
 """
-import json, random
+import json, random, sys
 
 random.seed(20261114)
 
@@ -46,6 +46,11 @@ def luhn_ok(s):
 
 def rd(n): return "".join(random.choice("0123456789") for _ in range(n))
 def rl(n): return "".join(random.choice("ABCDEFGHIJKLMNOPQRSTUVWXYZ") for _ in range(n))
+
+# Held-out pool: none of these first names is in Maskea's word list, so a run with --unseen measures names the detector has never been given.
+if "--unseen" in sys.argv:
+    FIRST = ["Zubin", "Tanmay", "Ishita", "Nandini", "Bhaskar", "Chirag", "Dilip", "Esha", "Farhan", "Gayatri", "Hemant", "Indu", "Jatin", "Kalpana", "Lalit", "Manisha", "Naresh", "Ojas", "Parth", "Qasim", "Rutuja", "Sahil", "Tejas", "Urvashi"]
+    LAST = ["Bhatt", "Chopra", "Deshmukh", "Gokhale", "Hegde", "Kamath", "Lal", "Naidu", "Oberoi", "Phadke", "Rastogi", "Seth", "Tandon", "Upadhyay", "Vora", "Fischer", "Novak", "Larsen", "Moreau", "Kowalski"]
 
 def name(): return f"{random.choice(FIRST)} {random.choice(LAST)}"
 def email():
@@ -95,7 +100,7 @@ POSITIVE = [
     ("IFSC", ifsc, ["Transfer to account 004512 with IFSC {}.", "Bank IFSC: {}", "Branch code {} was entered."]),
     ("PERSON", name, ["{} joined the call at ten.", "Meeting notes from {}.", "Assign the ticket to {}.", "The contract was signed by {} yesterday."]),
     ("LOCATION", address, ["Ship the parcel to {}.", "Registered office: {}", "He lives at {}."]),
-    ("LOCATION", city, ["The team is based in {}.", "We open a new office in {} next year."]),
+    ("CITY", city, ["The team is based in {}.", "We open a new office in {} next year."]),
 ]
 
 def fake_aadhaar():
@@ -131,7 +136,7 @@ for _ in range(60):
     n, e, p, c = name(), email(), phone_us(), city()
     text = f"{n} ({e}, {p}) works from {c}."
     gold = []
-    for typ, v in [("PERSON", n), ("EMAIL", e), ("PHONE", p), ("LOCATION", c)]:
+    for typ, v in [("PERSON", n), ("EMAIL", e), ("PHONE", p), ("CITY", c)]:
         i = text.index(v, gold[-1]["end"] if gold else 0) if False else text.index(v); gold.append({"type": typ, "start": i, "end": i + len(v)})
     docs.append({"text": text, "gold": gold})
 random.shuffle(docs)

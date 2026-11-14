@@ -1,16 +1,17 @@
 import type { Middleware } from "../types.js"
 import { deepRedact, type RedactionRule } from "./redact-utils.js"
 import { sendTelemetry } from "../telemetry/send.js"
+import { AMBIGUOUS_FIRST, FIRST_NAMES, NAME_LABELS, NOT_SURNAME, SURNAMES, TITLES } from "./names-data.js"
 
-export type PiiType = "email" | "phone" | "ssn" | "credit_card" | "aadhaar" | "pan" | "gstin" | "ifsc" | "upi" | "in_phone"
+export type PiiType = "email" | "phone" | "ssn" | "credit_card" | "aadhaar" | "pan" | "gstin" | "ifsc" | "upi" | "in_phone" | "name" | "address"
 
 // Types that are only scanned when asked for by name: they match formats that also occur in ordinary text, so turning them on
 // silently for everyone would change what existing users see.
-const OPT_IN: PiiType[] = ["aadhaar", "pan", "gstin", "ifsc", "upi", "in_phone"]
+const OPT_IN: PiiType[] = ["aadhaar", "pan", "gstin", "ifsc", "upi", "in_phone", "name", "address"]
 
 export interface PiiOptions {
   mode?: "mask" | "block"
-  /** Which PII types to scan for. Default: email, phone, ssn, credit_card. Add the India types "aadhaar", "pan", "gstin", "ifsc", "upi" and "in_phone" by name. */
+  /** Which PII types to scan for. Default: email, phone, ssn, credit_card. Add the India types "aadhaar", "pan", "gstin", "ifsc", "upi", "in_phone", and the rule-based "name" and "address" by name. */
   types?: PiiType[]
 }
 
@@ -55,7 +56,42 @@ export function gstinValid(gstin: string): boolean {
   return GSTIN_CHARS[(36 - (sum % 36)) % 36] === gstin[14]
 }
 
-const PII_RULES: Record<PiiType, RedactionRule> = {
+// Name detection is rule-based (word lists plus cues), so it is opt-in and honest about its limits: it finds known first names followed by a
+// surname-shaped word, and any capitalised words after a title or a label such as "Name:". It does not find names it has no cue for.
+function knownFullName(match: string): boolean {
+  const [first = "", second = "", third = ""] = match.split(/\s+/).map((w) => w.toLowerCase().replace(/\.$/, ""))
+  if (!FIRST_NAMES.has(first)) return false
+  const surname = second.length === 1 ? third : second // allow a middle initial
+  if (!surname || NOT_SURNAME.has(surname) || FIRST_NAMES.has(surname) && !SURNAMES.has(surname)) return false
+  if (AMBIGUOUS_FIRST.has(first)) return SURNAMES.has(surname)
+  return true
+}
+
+const NAME_RULES: RedactionRule[] = [
+  // Capitalised words after a title: "Dr. Meera Iyer", "Shri Rajesh Kumar".
+  { name: "name", pattern: new RegExp(`(?<=\\b(?:${TITLES})\\.?\\s+)[A-Z][a-z]+(?:\\s+[A-Z][a-z]+){0,2}\\b`, "g"), replacement: "[REDACTED_NAME]" },
+  // After a label: "Name: Anita Rao", "Patient - John Smith".
+  { name: "name", pattern: new RegExp(`(?<=\\b(?:${NAME_LABELS})\\s*[:\\-]\\s*)[A-Z][a-z]+(?:\\s+[A-Z][a-z]+){0,2}\\b`, "g"), replacement: "[REDACTED_NAME]" },
+  // A known first name followed by a surname-shaped word, optionally with a middle initial.
+  { name: "name", pattern: /\b[A-Z][a-z]+(?:\s+[A-Z]\.)?\s+[A-Z][a-z]+\b/g, replacement: "[REDACTED_NAME]", validate: knownFullName },
+]
+
+// Street addresses: a house number, up to three capitalised words, a street word (or a German -strasse name), then an optional city; and an Indian PIN
+// code when it follows "PIN" or "Pincode". Bare city names are deliberately not matched: a city on its own is not an identifier.
+const STREET_WORDS = "Street|St|Road|Rd|Avenue|Ave|Lane|Ln|Drive|Boulevard|Blvd|Marg|Nagar|Colony|Layout|Cross|Sector|Block|Way|Court|Place|Path|Chowk|Bazaar|Gali"
+const ADDRESS_RULES: RedactionRule[] = [
+  {
+    name: "address",
+    pattern: new RegExp(
+      `\\b\\d{1,5}[A-Za-z]?(?:[-/]\\d{1,4})?,?\\s+(?:[A-Z][\\w'.]*\\s+){0,3}(?:(?:${STREET_WORDS})\\b|[A-Z][a-z]+(?:strasse|straße|gasse|weg|platz)\\b)(?:,\\s*[A-Z][a-z]+(?:\\s[A-Z][a-z]+)?)?`,
+      "g"
+    ),
+    replacement: "[REDACTED_ADDRESS]",
+  },
+  { name: "address", pattern: /(?<=\b(?:PIN|Pin|Pincode|PIN code|Pin code)\s*[:\-]?\s*)[1-9]\d{2}\s?\d{3}\b/g, replacement: "[REDACTED_ADDRESS]" },
+]
+
+const PII_RULES: Record<Exclude<PiiType, "name" | "address">, RedactionRule> = {
   email: { name: "email", pattern: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g, replacement: "[REDACTED_EMAIL]" },
   // US format specifically (###-###-####, optional country code/parens) --
   // international phone formats are too structurally varied to match
@@ -96,18 +132,31 @@ const PII_RULES: Record<PiiType, RedactionRule> = {
   in_phone: { name: "in_phone", pattern: /(?<![\d-])(?:\+91[-\s]?|91[-\s]?|0)?[6-9]\d{4}[-\s]?\d{5}(?![-\s]?\d)/g, replacement: "[REDACTED_PHONE_IN]" },
 }
 
+function rulesFor(type: PiiType): RedactionRule[] {
+  if (type === "name") return NAME_RULES
+  if (type === "address") return ADDRESS_RULES
+  return [PII_RULES[type]]
+}
+function defaultTypes(): PiiType[] {
+  return (Object.keys(PII_RULES) as PiiType[]).filter((t) => !OPT_IN.includes(t))
+}
+
 /**
  * Finds PII in a string without changing it: the type and character range of every match, after checksum validation.
  * Used by the accuracy benchmark (benchmarks/pii-accuracy) and handy for audits. Defaults to the same types as pii().
  */
 export function detectPii(text: string, types?: PiiType[]): Array<{ type: PiiType; start: number; end: number }> {
-  const chosen = types ?? (Object.keys(PII_RULES) as PiiType[]).filter((t) => !OPT_IN.includes(t))
+  const chosen = types ?? defaultTypes()
   const found: Array<{ type: PiiType; start: number; end: number }> = []
   for (const type of chosen) {
-    const rule = PII_RULES[type]
-    for (const m of text.matchAll(new RegExp(rule.pattern.source, rule.pattern.flags))) {
-      if (rule.validate && !rule.validate(m[0])) continue
-      found.push({ type, start: m.index!, end: m.index! + m[0].length })
+    for (const rule of rulesFor(type)) {
+      for (const m of text.matchAll(new RegExp(rule.pattern.source, rule.pattern.flags))) {
+        if (rule.validate && !rule.validate(m[0])) continue
+        const start = m.index!
+        // Name rules can overlap (a titled name that is also a known full name): keep one span.
+        if (found.some((f) => f.type === type && f.start < start + m[0].length && start < f.end)) continue
+        found.push({ type, start, end: start + m[0].length })
+      }
     }
   }
   return found.sort((a, b) => a.start - b.start)
@@ -116,8 +165,8 @@ export function detectPii(text: string, types?: PiiType[]): Array<{ type: PiiTyp
 export function pii(options: PiiOptions = {}): Middleware {
   sendTelemetry("middleware_pii_enabled")
   const mode = options.mode ?? "mask"
-  const types = options.types ?? (Object.keys(PII_RULES) as PiiType[]).filter((t) => !OPT_IN.includes(t))
-  const rules = types.map((t) => PII_RULES[t])
+  const types = options.types ?? defaultTypes()
+  const rules = types.flatMap(rulesFor)
 
   return async (args, next, ctx) => {
     const { value, hits } = deepRedact(args, rules)
