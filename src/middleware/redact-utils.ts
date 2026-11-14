@@ -15,6 +15,8 @@ export interface RedactionRule {
    * keep visible -- never for PII/secrets.
    */
   action?: "redact" | "flag"
+  /** Optional check applied to each regex match (e.g. a checksum). A match that fails is left untouched and not counted. */
+  validate?: (match: string) => boolean
 }
 
 export interface RedactionHit {
@@ -51,7 +53,8 @@ export function deepRedact<T>(value: T, rules: RedactionRule[]): { value: T; hit
   function redactString(s: string): string {
     let out = s
     for (const rule of rules) {
-      const matches = out.match(rule.pattern)
+      const raw = out.match(rule.pattern)
+      const matches = rule.validate && raw ? raw.filter(rule.validate) : raw
       if (!matches || matches.length === 0) continue
 
       if (rule.action === "flag") {
@@ -63,7 +66,9 @@ export function deepRedact<T>(value: T, rules: RedactionRule[]): { value: T; hit
       }
 
       hitCounts.set(rule.name, (hitCounts.get(rule.name) ?? 0) + matches.length)
-      out = out.replace(rule.pattern, rule.replacement)
+      out = rule.validate
+        ? out.replace(rule.pattern, (m) => (rule.validate!(m) ? rule.replacement : m))
+        : out.replace(rule.pattern, rule.replacement)
     }
     return out
   }

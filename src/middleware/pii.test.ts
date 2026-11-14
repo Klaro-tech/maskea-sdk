@@ -33,15 +33,41 @@ describe("pii middleware", () => {
   })
 
   it("India identifiers are off by default and redacted when asked for", async () => {
-    const text = "Aadhaar 2345 6789 0123, PAN ABCPE1234F"
+    const text = "Aadhaar 2345 6789 0124, PAN ABCPE1234F"
     const off = new Maskea().use(pii({ mode: "mask" }))
     const r1 = await off.wrap(async (a: { text: string }) => ({ echo: a.text }))({ text })
-    expect(r1.echo).toContain("2345 6789 0123")
+    expect(r1.echo).toContain("2345 6789 0124")
     const on = new Maskea().use(pii({ mode: "mask", types: ["aadhaar", "pan"] }))
     const r2 = await on.wrap(async (a: { text: string }) => ({ echo: a.text }))({ text })
-    expect(r2.echo).not.toContain("2345 6789 0123")
+    expect(r2.echo).not.toContain("2345 6789 0124")
     expect(r2.echo).not.toContain("ABCPE1234F")
     expect(r2.echo).toContain("[REDACTED_AADHAAR]")
     expect(r2.echo).toContain("[REDACTED_PAN]")
+  })
+
+  it("Aadhaar needs a valid check digit, so look-alike groups are left alone", async () => {
+    const on = new Maskea().use(pii({ mode: "mask", types: ["aadhaar"] }))
+    const r = await on.wrap(async (a: { text: string }) => ({ echo: a.text }))({ text: "real 2345 6789 0124 fake 2345 6789 0123" })
+    expect(r.echo).toContain("[REDACTED_AADHAAR]")
+    expect(r.echo).toContain("2345 6789 0123")
+    expect(r.echo).not.toContain("2345 6789 0124")
+  })
+
+  it("redacts GSTIN (checksum verified), IFSC, UPI IDs and Indian mobile numbers when asked for", async () => {
+    const text = "GSTIN 27ABCPE1234F1ZB bad 27ABCPE1234F1ZC, IFSC HDFC0001234, pay vikram.k@okaxis or 98765 43210 or +91 9876543210 or mail a@example.com"
+    const on = new Maskea().use(pii({ mode: "mask", types: ["gstin", "ifsc", "upi", "in_phone"] }))
+    const r = await on.wrap(async (a: { text: string }) => ({ echo: a.text }))({ text })
+    expect(r.echo).toContain("[REDACTED_GSTIN]")
+    expect(r.echo).toContain("27ABCPE1234F1ZC") // wrong check character: not a GSTIN
+    expect(r.echo).toContain("[REDACTED_IFSC]")
+    expect(r.echo).toContain("[REDACTED_UPI]")
+    expect(r.echo).not.toContain("okaxis")
+    expect(r.echo).toContain("[REDACTED_PHONE_IN]")
+    expect(r.echo).not.toContain("98765 43210")
+    expect(r.echo).not.toContain("9876543210")
+    expect(r.echo).toContain("a@example.com") // ordinary email untouched by these types
+    const off = new Maskea().use(pii({ mode: "mask" }))
+    const r2 = await off.wrap(async (a: { text: string }) => ({ echo: a.text }))({ text })
+    expect(r2.echo).toContain("HDFC0001234")
   })
 })
